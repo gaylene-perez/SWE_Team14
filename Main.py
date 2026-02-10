@@ -3,7 +3,7 @@
 #Spring 2026
 from tkinter import Tk
 from tkinter import *
-From splashScreen import Splash
+from splashScreen import Splash
 
 
 class Main:
