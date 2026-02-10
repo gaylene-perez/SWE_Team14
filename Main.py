@@ -1,6 +1,8 @@
 #Team 14
 #CSCE 35103-001
 #Spring 2026
+from tkinter import Tk
+
 
 class Main:
 
@@ -55,7 +57,7 @@ class Splash:
     
 
     #PLAYER SCREEN
-        #red team / green team
+        #red team (odd) / green team (even)
         #max 15 players per team
 
         #f12 clears all entries
@@ -65,7 +67,6 @@ class Splash:
 
         #prompt for equipment id that player is using (int)
 
-        #broadcast equip. id through udp port 7500
 
     #GAME
     #f5 or start button moves to next screen (play action screen)
