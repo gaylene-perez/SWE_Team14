@@ -23,7 +23,13 @@ class Main:
     #SPLASH SCREEN
     #display splash screen for 3 seconds upon startup
     # Run splash screen
-    Splash()
+    def __init__(self):
+        #initializes the main program
+        pass
+
+    if __name__ == "__main__":
+        #run splash screen first
+        Splash()
     
 
     #PLAYER SCREEN
