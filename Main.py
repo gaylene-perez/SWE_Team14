@@ -75,8 +75,8 @@ from tkinter import *
 from PIL import Image, ImageTk
 
 class Splash:
-    def __init__(self) -> None:
-        # Setting up a blank screen
+    def __init__(self):
+        #setting up the blnk screen
         width = 1000
         height = 700
 
@@ -84,29 +84,27 @@ class Splash:
 
         screen_width = self.root.winfo_screenwidth()
         screen_height = self.root.winfo_screenheight()
-        x_coordinate = (screen_width / 2) - (width / 2)
-        y_coordinate = (screen_height / 2) - (height / 2)
+        x = int((screen_width / 2) - (width / 2))
+        y = int((screen_height / 2) - (height / 2))
 
-        # Adjust where the screen pops up
-        self.root.geometry("%dx%d+%d+%d" %
-                           (width, height, x_coordinate, y_coordinate))
+        #adjusting where the screen will pop up
+        self.root.geometry(f"{width}x{height}+{x}+{y}")
+        #removing the page heading
+        self.root.overrideredirect(True)
 
-        # Removing the page heading
-        self.root.overrideredirect(1)
-
-        Frame(self.root, width=427, height=241, bg='black').place(x=50, y=100)
-
-        # Adding the logo
+        #adding the logo
         im = Image.open("logo.jpg")
         logo = im.resize((width, height))
-        LOGO = ImageTk.PhotoImage(logo)
+        self.LOGO = ImageTk.PhotoImage(logo)
 
-        # Inserting the logo
-        logo_label = Label(image=LOGO, bg='black')
-        logo_label.place(x=0, y=0)
+        #inserting the logo
+        label = Label(self.root, image=self.LOGO)
+        label.pack()
 
-        self.root.after(3000, lambda: self.root.destroy())
-        mainloop()
+        self.root.after(3000, self.root.destroy)
+        self.root.mainloop()
+
+    
 
     #PLAYER SCREEN
         #red team / green team
