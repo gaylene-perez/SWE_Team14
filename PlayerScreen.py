@@ -28,6 +28,9 @@ class PlayerEntry:
 # codename = self.codename_var.get().strip()
 #PLAYER SCREEN
 class PlayerScreen(tk.Frame):
+
+    ip = "127.0.0.1"
+    
     def __init__(self, master):
         super().__init__(master)
 
@@ -62,6 +65,7 @@ class PlayerScreen(tk.Frame):
         tk.Label(self, text="ADD PLAYER (F1)").grid(row=15, column=1, padx=10, pady=10, sticky="ew") #sticky="ew" fills cell
         tk.Label(self, text="START GAME (F5)").grid(row=15, column=2, padx=10, pady=5, sticky="ew")
         tk.Label(self, text="CLEAR ALL (F12)").grid(row=15, column=3, padx=10, pady=5, sticky="ew")
+        tk.Label(self, text="SWITCH NETWORK").grid(row=16, column=1, padx=10, pady=10, sticky="ew")
 
         #red team
         tk.Label(self, text="RED TEAM (ODD)").grid(row=1, column=1, padx=10, pady=5, sticky="ew")
@@ -106,6 +110,11 @@ class PlayerScreen(tk.Frame):
     def reset_players(self):
         self.red_players = []
         self.green_players = []
+
+    #change IP addresses
+    def switch_network(self):
+        self.ip = input("Please enter an IP address:")
+        return self.ip
 
 if __name__ == "__main__":
     root = tk.Tk()
