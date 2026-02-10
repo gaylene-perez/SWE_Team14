@@ -1,11 +1,10 @@
 from tkinter import *
-from PIL import Image, ImageTk
 
 class Splash:
     def __init__(self):
-        #setting up the blnk screen
+        #setting up the blank screen
         width = 1000
-        height = 700
+        height = 637
 
         self.root = Tk()
 
@@ -16,18 +15,18 @@ class Splash:
 
         #adjusting where the screen will pop up
         self.root.geometry(f"{width}x{height}+{x}+{y}")
-        #removing the page heading
+        #removing the header
         self.root.overrideredirect(True)
 
-        #adding the logo
-        im = Image.open("logo.jpg")
-        logo = im.resize((width, height))
-        self.LOGO = ImageTk.PhotoImage(logo)
+        # adding logo
+        self.logo = PhotoImage(file="logo.png")  
+        label = Label(self.root, image=self.logo)
+        label.pack(expand=True, fill=BOTH)
 
         #inserting the logo
-        label = Label(self.root, image=self.LOGO)
-        label.pack()
-
         self.root.after(3000, self.root.destroy)
         self.root.mainloop()
 
+
+# Run splash screen
+Splash()
