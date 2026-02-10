@@ -28,5 +28,3 @@ class Splash:
         self.root.mainloop()
 
 
-# Run splash screen
-Splash()
