@@ -2,6 +2,7 @@
 #CSCE 35103-001
 #Spring 2026
 from tkinter import Tk
+from tkinter import *
 
 
 class Main:
