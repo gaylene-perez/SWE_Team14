@@ -1,7 +1,6 @@
 #Team 14
 #CSCE 35103-001
 #Spring 2026
-from tkinter import Tk
 from tkinter import *
 from splashScreen import Splash
 
