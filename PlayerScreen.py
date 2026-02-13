@@ -3,6 +3,7 @@ import tkinter as tk #gui
 from tkinter import messagebox
 from dataclasses import dataclass
 from typing import List
+from tkinter import simpledialog
 
 # PLAYER SCREEN
 # red team (odd) / green team (even)
@@ -65,9 +66,8 @@ class PlayerScreen(tk.Frame):
         tk.Label(self, text="ADD PLAYER (F1)").grid(row=15, column=1, padx=10, pady=10, sticky="ew") #sticky="ew" fills cell
         tk.Label(self, text="START GAME (F5)").grid(row=15, column=2, padx=10, pady=5, sticky="ew")
         tk.Label(self, text="CLEAR ALL (F12)").grid(row=15, column=3, padx=10, pady=5, sticky="ew")
-        button = tk.Button(root, text="CLICK TO SWITCH NETWORKS", command=self.switch_network, fg="blue", bg="light gray", height=2, width=30)
+        button = tk.Button(root, text="CLICK TO SWITCH NETWORKS", command=self.switch_network, fg="blue", bg="light gray", height=2, width=25)
         button.pack(pady=10)
-        #tk.Label(self, text="SWITCH NETWORK").grid(row=16, column=1, padx=10, pady=10, sticky="ew")
 
         #red team
         tk.Label(self, text="RED TEAM (ODD)").grid(row=1, column=1, padx=10, pady=5, sticky="ew")
@@ -113,9 +113,14 @@ class PlayerScreen(tk.Frame):
         self.red_players = []
         self.green_players = []
 
-    #change IP addresses
+    #change IP address
     def switch_network(self):
-        self.ip = input("Please enter an IP address:")
+        temp = self.ip
+        self.ip = simpledialog.askstring("Input", "Please enter a valid IP address:", parent=root)
+
+        if self.ip is None:
+            self.ip = temp
+
         return self.ip
 
 if __name__ == "__main__":
