@@ -116,7 +116,7 @@ class PlayerScreen(tk.Frame):
     #change IP address
     def switch_network(self):
         temp = self.ip
-        self.ip = simpledialog.askstring("Input", "Please enter a valid IP address:", parent=root)
+        self.ip = simpledialog.askstring("Input", f"Current IP address: {self.ip}\nPlease enter a valid IP address:", parent=root)
 
         if self.ip is None:
             self.ip = temp
