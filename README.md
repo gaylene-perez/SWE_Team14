@@ -1,6 +1,7 @@
 # SWE_Team14
 
 1) Install Python (if not already installed)
+
 check version:
     python3 --version
 if not installed:
@@ -8,11 +9,13 @@ if not installed:
     sudo apt install python3
 
 2) Install pip
+
     sudeo apt install python3-pip
 verify installation:
     python3 -m pip --version
 
 3) Instal Python package
+
    python -m pip install psycopg2-binary
 
 4) Database Setup
