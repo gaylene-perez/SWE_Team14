@@ -36,6 +36,6 @@ verify installation:
        Exit PostgreSQL:
           \q
 
-Runnint the Program:
+Running the Program:
   python3 Main.py
 
