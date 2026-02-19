@@ -1,4 +1,174 @@
-import tkinter as tk #gui
+import tkinter as tk
+from tkinter import messagebox, simpledialog
+from dataclasses import dataclass
+from typing import List
+from database import insert_player, playerIdExist
+
+# PLAYER SCREEN
+# red team (odd) / green team (even)
+# max 15 players per team
+
+# f12 clears all entries
+# prompt for player id
+    # query database for codename
+    # if not found, allow new name entry to add to database
+
+# prompt for equipment id that player is using (int)
+    # print("Enter data to send: ")
+
+MAX_PLAYERS = 15  # max 15 players per team
+
+@dataclass
+class PlayerEntry:
+    player_id: int
+    codename: str
+    equipment_id: int
+
+class PlayerScreen(tk.Frame):
+
+    ip = "127.0.0.1"
+
+    def __init__(self, master):
+        super().__init__(master)
+        self.master = master
+
+        self.player_id_var = tk.StringVar()
+        self.codename_var = tk.StringVar()
+        self.equipment_id_var = tk.StringVar()
+
+        self.red_players: List[PlayerEntry] = []  # red, odd eq id
+        self.green_players: List[PlayerEntry] = []  # green, even eq id
+
+        self._ui()
+        self._key_input()
+
+    def _ui(self):
+        # title
+        title = tk.Label(self, text="PLAYER ENTRY SCREEN", font=("Times New Roman", 20, "bold"))
+        title.grid(row=0, column=0, columnspan=2, padx=10, pady=10)
+
+        # player id
+        tk.Label(self, text="PLAYER ID:").grid(row=1, column=0, sticky="e")
+        tk.Entry(self, textvariable=self.player_id_var).grid(row=1, column=1)
+
+        # codename
+        tk.Label(self, text="CODENAME:").grid(row=2, column=0, sticky="e")
+        tk.Entry(self, textvariable=self.codename_var).grid(row=2, column=1)
+
+        # equipment id
+        tk.Label(self, text="EQUIPMENT ID:").grid(row=3, column=0, sticky="e")
+        tk.Entry(self, textvariable=self.equipment_id_var).grid(row=3, column=1)
+
+        # buttons
+        tk.Button(self, text="ADD PLAYER (F1)", command=self.add_player).grid(row=4, column=0, columnspan=2, pady=5)
+        tk.Button(self, text="REMOVE PLAYER", command=self.remove_player).grid(row=5, column=0, columnspan=2, pady=5)
+        tk.Button(self, text="SWITCH NETWORK", command=self.switch_network).grid(row=6, column=0, columnspan=2, pady=5)
+
+        # red team
+        tk.Label(self, text="RED TEAM (ODD)").grid(row=7, column=0)
+        self.red_listbox = tk.Listbox(self, height=10, width=30)
+        self.red_listbox.grid(row=8, column=0)
+
+        # green team
+        tk.Label(self, text="GREEN TEAM (EVEN)").grid(row=7, column=1)
+        self.green_listbox = tk.Listbox(self, height=10, width=30)
+        self.green_listbox.grid(row=8, column=1)
+
+    def _key_input(self):
+        self.master.bind("<F12>", self.reset_players)
+        self.master.bind("<F1>", self.add_player)
+
+    # Add player to database and team
+    def add_player(self, event=None):
+        player_id = self.player_id_var.get().strip()
+        codename = self.codename_var.get().strip()
+        equipment_id = self.equipment_id_var.get().strip()
+
+        if not player_id or not equipment_id:
+            messagebox.showerror("Error", "Player ID and Equipment ID are required!")
+            return
+
+        try:
+            player_id_int = int(player_id)
+            equipment_id_int = int(equipment_id)
+        except ValueError:
+            messagebox.showerror("Error", "Player ID and Equipment ID must be integers!")
+            return
+
+        existing_codename = playerIdExist(player_id_int)
+        if existing_codename:
+            codename = existing_codename
+            messagebox.showinfo("Player Found", f"Codename: {codename}")
+        else:
+            if not codename:
+                messagebox.showerror("Error", "Enter a codename for new player")
+                return
+            insert_player(player_id_int, codename)
+            messagebox.showinfo("Added", "New player added to database")
+
+        player = PlayerEntry(player_id_int, codename, equipment_id_int)
+        self.add_to_team(player)
+
+        # clear entries
+        self.player_id_var.set("")
+        self.codename_var.set("")
+        self.equipment_id_var.set("")
+
+    def add_to_team(self, player: PlayerEntry):
+        if player.equipment_id % 2 == 1:
+            if len(self.red_players) < MAX_PLAYERS:
+                self.red_players.append(player)
+                self.red_listbox.insert(tk.END, f"{player.codename} (ID:{player.player_id}, EQ:{player.equipment_id})")
+            else:
+                messagebox.showerror("Error", "Red team full!")
+        else:
+            if len(self.green_players) < MAX_PLAYERS:
+                self.green_players.append(player)
+                self.green_listbox.insert(tk.END, f"{player.codename} (ID:{player.player_id}, EQ:{player.equipment_id})")
+            else:
+                messagebox.showerror("Error", "Green team full!")
+
+    # Remove selected player
+    def remove_player(self):
+        red_index = self.red_listbox.curselection()
+        green_index = self.green_listbox.curselection()
+
+        if red_index:
+            idx = red_index[0]
+            self.red_listbox.delete(idx)
+            self.red_players.pop(idx)
+        elif green_index:
+            idx = green_index[0]
+            self.green_listbox.delete(idx)
+            self.green_players.pop(idx)
+        else:
+            messagebox.showinfo("Remove Player", "Select a player to remove first.")
+
+    # Reset all players
+    def reset_players(self, event=None):
+        self.red_players.clear()
+        self.green_players.clear()
+        self.red_listbox.delete(0, tk.END)
+        self.green_listbox.delete(0, tk.END)
+
+    # change IP address
+    def switch_network(self):
+        ip = simpledialog.askstring("Switch Network", f"Current IP: {self.ip}\nEnter new IP:")
+        if ip:
+            self.ip = ip
+            messagebox.showinfo("Network Changed", f"New IP: {self.ip}")
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    root.title("PLAYER SCREEN")
+    screen = PlayerScreen(root)
+    screen.pack(padx=10, pady=10)
+    root.mainloop()
+
+
+
+#PlayerScreen.py For Sprint 3: 
+"""import tkinter as tk #gui
 # from tkinter import *
 from tkinter import messagebox
 from dataclasses import dataclass
@@ -310,4 +480,4 @@ if __name__ == "__main__":
     screen = PlayerScreen(root)
     screen.pack(fill="both", expand=True)
 
-    root.mainloop()
+    root.mainloop()"""
