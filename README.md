@@ -42,3 +42,14 @@ verify installation:
 Running the Program:
   python3 Main.py
 
+
+
+
+
+Usernames:
+
+katelyncraig  - Katelyn Craig
+India-Jones   - India Jones
+ReaganC05     - Reagan Clark
+DarlaEthridge - Darla Ethridge
+gaylene-perez - Gaylene Perez
