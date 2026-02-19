@@ -3,7 +3,7 @@
 #Spring 2026
 from tkinter import *
 from splashScreen import Splash
-
+from PlayerScreen import PlayerScreen
 
 class Main:
 
@@ -17,20 +17,32 @@ class Main:
                 #broadcast equip. id of player hit
     #use localhost (127.0.0.1) for network addr
         #include functionality to change network addr
-    
-   
 
     #SPLASH SCREEN
     #display splash screen for 3 seconds upon startup
-    # Run splash screen
     def __init__(self):
         #initializes the main program
-        pass
+        self.root = Tk()
+        self.root.title("MAIN APP")
 
-    if __name__ == "__main__":
-        #run splash screen first
-        Splash()
-    
+        # run splash screen first
+        self.show_splash()
+
+        # then open player entry screen
+        self.open_player_screen()
+
+        # start main loop
+        self.root.mainloop()
+
+    def show_splash(self):
+        splash = Splash(self.root)
+        # wait until splash is closed before continuing
+        self.root.wait_window(splash.root)
+
+    #button to open player entry screen
+    def open_player_screen(self):
+        self.screen = PlayerScreen(self.root)
+        self.screen.pack(padx=10, pady=10)
 
     #PLAYER SCREEN
         #red team (odd) / green team (even)
@@ -42,7 +54,6 @@ class Main:
             #if not found, allow new name entry to add to database
 
         #prompt for equipment id that player is using (int)
-
 
     #GAME
     #f5 or start button moves to next screen (play action screen)
@@ -80,4 +91,7 @@ class Main:
     #after game ends, leave display at play action screen
     #add button to get back to player entry screen
         #broadcast code 221 three times
+
+if __name__ == "__main__":
+    Main()
 
