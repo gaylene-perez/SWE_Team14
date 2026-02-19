@@ -14,7 +14,7 @@ if not installed:
 verify installation:
     python3 -m pip --version
 
-3) Instal Python package
+3) Install Python package
 
    python -m pip install psycopg2-binary
 
@@ -43,13 +43,10 @@ Running the Program:
   python3 Main.py
 
 
-
-
-
-Usernames:
-
-katelyncraig  - Katelyn Craig
-India-Jones   - India Jones
-ReaganC05     - Reagan Clark
-DarlaEthridge - Darla Ethridge
-gaylene-perez - Gaylene Perez
+  GitHub Names |  Real Names
+ --------------|--------------
+ gaylene-perez | Gaylene Perez
+ katelyncraig  | Katelyn Craig
+ India-Jones   | India Jones
+ DarlaEthridge | Darla Ethridge
+ ReaganC05     | Reagan Clark
