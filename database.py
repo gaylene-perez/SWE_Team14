@@ -4,9 +4,9 @@ import psycopg2
 try : 
   conn = psycopg2.connect(
     dbname="photon",
-    user="student",
-    password="student",
-    host="localhost"
+    # user="student",
+    # password="student",
+    # host="localhost"
   )
 
   cursor = conn.cursor()
