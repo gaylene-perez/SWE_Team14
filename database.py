@@ -1,5 +1,7 @@
 import psycopg2
 
+conn = None #if connection fails, conn is NOne.
+
 # Connect to the photon datatbase
 try : 
   conn = psycopg2.connect(
@@ -43,7 +45,7 @@ def playerIdExist(player_id):
 
 def insert_player(player_id, codename):
     if not conn:
-        return
+        return False #explicit result
     try:
         with conn.cursor() as cursor:
             cursor.execute(
@@ -52,8 +54,10 @@ def insert_player(player_id, codename):
             )
             conn.commit()
             print(f"Inserted player {player_id} - {codename}")
+            return True #success
     except Exception as e:
         print(f"Error inserting player: {e}")
+        return False #again, explicit result
 
 
 
