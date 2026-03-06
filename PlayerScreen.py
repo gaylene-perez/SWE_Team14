@@ -2,6 +2,8 @@ import tkinter as tk  # gui
 from tkinter import messagebox, simpledialog
 from dataclasses import dataclass
 from typing import List
+
+import database
 from database import insert_player, playerIdExist
 
 # PLAYER SCREEN
@@ -21,6 +23,7 @@ MAX_PLAYERS = 15  # max 15 players per team
 
 @dataclass
 class PlayerEntry:
+    playerId: int
     codename: str
     equipment_id: int
 
@@ -33,6 +36,7 @@ class PlayerScreen(tk.Frame):
         super().__init__(master)
         self.master = master
 
+        self.player_id_var = tk.StringVar()
         self.codename_var = tk.StringVar()
         self.equipment_id_var = tk.StringVar()
 
@@ -44,6 +48,7 @@ class PlayerScreen(tk.Frame):
 
         self._style()
         self._ui()
+        self._load_players_from_db()
         self._key_input()
 
     def _style(self) -> None:
@@ -51,8 +56,6 @@ class PlayerScreen(tk.Frame):
         self.configure(background="black")
 
     def _ui(self) -> None:
-        # self.master.configure(bg="black")
-        # self.grid(row=0, column=0, sticky="nsew")
         self.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
         self.master.rowconfigure(0, weight=1)
@@ -60,45 +63,19 @@ class PlayerScreen(tk.Frame):
 
         content = tk.Frame(self, bg="black")
         content.grid(row=0, column=0, sticky="nsew")
-        # content.pack(fill="both", expand=True)
 
         content.rowconfigure(0, weight=0)  #title
-        content.rowconfigure(1, weight=0) #form
-        content.rowconfigure(2, weight=1)  #team
-        content.rowconfigure(3, weight=0) #menu
+        content.rowconfigure(1, weight=0) #team
+        content.rowconfigure(2, weight=1)  #menu
         content.columnconfigure(0, weight=1)
 
         # title
         title = tk.Label(content, text="PLAYER ENTRY SCREEN", font=("Courier New", 20, "bold"), fg="white",bg="black")  # fg = foreground (text color), bg = background
         title.grid(row=0, column=0, padx=10, pady=10, sticky="w")  # sticky="w" means aligned left
 
-        #form
-        form = tk.Frame(content, bg="black")
-        form.grid(row=1, column=0, padx=10, pady=(10,6), sticky="w")
-        # form = tk.Frame(main, bg="black")
-        # form.grid(row=0, column=0, sticky="n", padx=(0, 20))
-        form.columnconfigure(0, weight=1)
-        form.columnconfigure(1, weight=1)
-
-        label_style = {"bg": "black", "fg": "white", "font": ("Courier New", 12, "bold")}
-        entry_style = {"bg": "black", "fg": "white", "font": ("Courier New", 12, "bold"), "insertbackground": "white", "relief": "groove"}
-
-        # codename
-        tk.Label(form, text="CODENAME:", **label_style).grid(row=0, column=0, sticky="e", padx=(0, 10), pady=4)
-        self.codename_entry = tk.Entry(form, textvariable=self.codename_var, **entry_style)
-        self.codename_entry.grid(row=0, column=1, sticky="ew", pady=4)
-
-        # equipment id
-        tk.Label(form, text="EQUIPMENT ID:", **label_style).grid(row=1, column=0, sticky="e", padx=(0, 10), pady=4)
-        self.equipment_entry = tk.Entry(form, textvariable=self.equipment_id_var, **entry_style)
-        self.equipment_entry.grid(row=1, column=1, sticky="ew", pady=4)
-
-        self.codename_entry.bind("<Return>", self.add_player)
-        self.equipment_entry.bind("<Return>", self.add_player)
-
         #roster
         main = tk.Frame(content, bg="black")
-        main.grid(row=2, column=0, padx=10, pady=10, sticky="nsew")
+        main.grid(row=1, column=0, padx=10, pady=10, sticky="nsew")
         main.rowconfigure(0, weight=1)
         main.columnconfigure(0, weight=1)  # red
         main.columnconfigure(1, weight=1)  # green
@@ -106,23 +83,17 @@ class PlayerScreen(tk.Frame):
         # red team
         red_panel = self._team_panel(main, "RED TEAM", bg="black", accent="red")
         red_panel.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
-        # tk.Label(self, text="RED TEAM (ODD)").grid(row=7, column=0)
-        # self.red_listbox = tk.Listbox(self, height=10, width=30)
-        # self.red_listbox.grid(row=8, column=0)
 
         # green team
         green_panel = self._team_panel(main, "GREEN TEAM", bg="black", accent="green")
         green_panel.grid(row=0, column=1, padx=10, pady=10, sticky="nsew")
-        # tk.Label(self, text="GREEN TEAM (EVEN)").grid(row=7, column=1)
-        # self.green_listbox = tk.Listbox(self, height=10, width=30)
-        # self.green_listbox.grid(row=8, column=1)
 
         self._build_rows(red_panel, team="red")
         self._build_rows(green_panel, team="green")
 
         # menu
         menu = tk.Frame(content, bg="black")
-        menu.grid(row=3, column=0, sticky="ew", padx=16, pady=(0, 12))
+        menu.grid(row=2, column=0, sticky="ew", padx=16, pady=(0, 12))
         for i in range(5):
             menu.columnconfigure(i, weight=1)
         self._menu(menu, 0, "F1\nAdd\nPlayer", self.add_player)
@@ -132,12 +103,7 @@ class PlayerScreen(tk.Frame):
         self._menu(menu, 4, "ESC\nExit", self.quit)
         # button = tk.Button(self, text="CLICK TO SWITCH NETWORKS", command=self.switch_network, fg="blue", bg="light gray", height=2, width=25)
 
-
-    def _menu(self, parent, col: int, text: str, cmd) -> None:
-        bn = tk.Button(parent, text=text, command=cmd, fg="blue", bg="#8a8a8a", activebackground="#9a9a9a", relief="ridge", bd=2, font=("Courier New", 10, "bold"), height=3)
-        bn.grid(row=0, column=col, padx=6, pady=8, sticky="ew")
-
-    def _make_scroll(self, parent, bg:str):
+    def _make_scroll(self, parent, bg: str):
         canvas = tk.Canvas(parent, bg=bg, highlightthickness=0)
         vbar = tk.Scrollbar(parent, orient="vertical", command=canvas.yview, width=3)
         canvas.configure(yscrollcommand=vbar.set)
@@ -159,9 +125,11 @@ class PlayerScreen(tk.Frame):
 
         def _on_mousewheel(event):
             canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+
         # def _bind_to_child
         def _bind_wheel(_event=None):
             canvas.bind_all("<MouseWheel>", _on_mousewheel)
+
         def _unbind_wheel(_event=None):
             canvas.unbind_all("MouseWheel")
 
@@ -173,6 +141,12 @@ class PlayerScreen(tk.Frame):
 
         return canvas, inner
 
+
+    def _menu(self, parent, col: int, text: str, cmd) -> None:
+        bn = tk.Button(parent, text=text, command=cmd, fg="blue", bg="#8a8a8a", activebackground="#9a9a9a", relief="ridge", bd=2, font=("Courier New", 10, "bold"), height=3)
+        bn.grid(row=0, column=col, padx=6, pady=8, sticky="ew")
+
+
     def _team_panel(self, parent, title:str, bg="black", accent="white") -> tk.Frame:
         panel = tk.Frame(parent, bg=bg, bd=2, relief="groove")
         panel.rowconfigure(1, weight=1)
@@ -181,8 +155,6 @@ class PlayerScreen(tk.Frame):
         header = tk.Label(panel, text=title, font=("Courier New", 20, "bold"), fg=accent, bg=bg)
         header.grid(row=0, column=0, padx=10, pady=10, sticky="ew")
 
-        # body = tk.Frame(panel, bg=bg)
-        # body.grid(row=1, column=0, padx=10, pady=10, sticky="nsew")
         body_container = tk.Frame(panel, bg=bg)
         body_container.grid(row=1, column=0, padx=10, pady=10, sticky="nsew")
         canvas, inner = self._make_scroll(body_container, bg)
@@ -204,11 +176,8 @@ class PlayerScreen(tk.Frame):
         accent = panel.panel_accent
 
         rows = []
-        #headers
-        # tk.Label(body, text="#", font=("Courier New", 14, "bold"), fg=accent, bg=bg).grid(row=0, column=1, sticky="w", padx=10)
-        tk.Label(body, text="PLAYER\nID", font=("Courier New", 14, "bold"), fg=accent, bg=bg).grid(row=0, column=0, sticky="w", padx=10)
+        #header
         tk.Label(body, text="CODENAME", font=("Courier New", 14, "bold"), fg=accent, bg=bg).grid(row=0, column=1, sticky="w", padx=10)
-        tk.Label(body, text="EQUIPMENT\nID", font=("Courier New", 14, "bold"), fg=accent, bg=bg).grid(row=0, column=2, sticky="w", padx=10)
 
         cell_style = {"bg": bg, "fg": "white", "font": ("Courier New", 12, "bold"), "relief": "groove", "bd": 2, "anchor": "w", "padx": 6}
 
@@ -216,42 +185,52 @@ class PlayerScreen(tk.Frame):
             index = tk.Label(body, text=str(i), font=("Courier New", 20, "bold"), fg="white", bg=bg)
             index.grid(row=i, column=0, padx=10, pady=10, sticky="w")
 
-            code = tk.Entry(body, bg=bg, relief="groove")
+            code = tk.Label(body, bg=bg, fg="white", font=("Courier New", 14, "bold"), relief="groove", anchor="w", padx=6)
             code.grid(row=i, column=1, padx=3, pady=10, sticky="ew")
 
-            eid = tk.Entry(body, bg=bg, relief="groove")
-            eid.grid(row=i, column=2, padx=3, pady=3, sticky="ew")
-
-            rows.append({"codename": code, "equipment": eid})
+            rows.append({"codename": code})
 
         if team == "red":
             self.red_rows = rows
         else:
             self.green_rows = rows
 
-    def _key_input(self):
-        # self.master.bind("<F1>", lambda e: self.handle_new_player())
+    def _load_players_from_db(self):
+        print("DEBUG: database.conn =", database.conn)
+
+        if not database.conn:
+            return
+
+        try:
+            print("DEBUG: Loading players from DB...")
+            with database.conn.cursor() as cursor:
+                cursor.execute("SELECT * FROM players")
+                records = cursor.fetchall()
+                print("DEBUG: records =", records)
+
+            for player_id, codename, equipment_id in records:
+                player = PlayerEntry(player_id, codename, equipment_id)
+
+                if equipment_id % 2 == 1:
+                    if len(self.red_players) < MAX_PLAYERS:
+                        self.red_players.append(player)
+                        self._write_player_to_row("red", player)
+                else:
+                    if len(self.green_players) < MAX_PLAYERS:
+                        self.green_players.append(player)
+                        self._write_player_to_row("green", player)
+        except Exception as e:
+            print(f"Error loading players from database: {e}")
+
+    def _key_input(self, event=None):
         self.master.bind("<F1>", self.add_player)
-        # root.bind("<F5>", self.start_game)
         self.master.bind("<F5>", lambda e: self.start_game())
-        # self.master.bind("<F10>", lambda e: self.switch_network())
-        # self.master.bind("<F12>", lambda e: self.reset_players())
         self.master.bind("<F12>", self.reset_players)
-        # self.master.bind("<Escape>", self.quit())
         self.master.bind("<Escape>", lambda e: self.quit())
 
         # k = Tk()
         # k.bind("<F12>", self.reset_players()) #bind(event, function)
 
-    # def query_player(self, codename: str) -> PlayerEntry:
-    #     for entry in self.red_players:
-    #         if entry.codename == codename:
-    #             return entry
-    #     for entry in self.green_players:
-    #         if entry.codename == codename:
-    #             return entry
-    #     return None
-    #
 
     def _write_player_to_row(self, team:str, player:PlayerEntry) -> None:
         rows = self.red_rows if team == "red" else self.green_rows
@@ -259,38 +238,88 @@ class PlayerScreen(tk.Frame):
 
         if 0 <= index < len(rows):
             rows[index]["codename"].config(text=player.codename)
-            rows[index]["equipment"].config(text=player.equipment_id)
 
 
     # Add player to database and team
-    # def add_new_player(self, player: PlayerEntry) -> None:
     def add_player(self, event=None):
+        popup = tk.Toplevel(self.master)
+        popup.title("Add Player")
+        popup.configure(bg="black")
+        popup.resizable(width=False, height=False)
+
+        label_style = {"bg": "black", "fg": "white", "font": ("Courier New", 12, "bold")}
+        entry_style = {"bg": "black", "fg": "white", "font": ("Courier New", 12, "bold"), "insertbackground": "white"}
+
+        tk.Label(popup, text="PLAYER ID:", **label_style).grid(row=0, column=0, padx=10, pady=10, sticky="w")
+        player_id_entry = tk.Entry(popup, textvariable=self.player_id_var, **entry_style)
+        player_id_entry.grid(row=0, column=1, padx=10, pady=5)
+        player_id_entry.focus()
+
+        tk.Label(popup, text="CODENAME:", **label_style).grid(row=1, column=0, padx=10, pady=10, sticky="w")
+        codename_entry = tk.Entry(popup, textvariable=self.codename_var, **entry_style, state="disabled")
+        codename_entry.grid(row=1, column=1, padx=10, pady=5)
+
+        tk.Label(popup, text="EQUIPMENT ID:", **label_style).grid(row=2, column=0, padx=10, pady=10, sticky="w")
+        self.equipment_entry = tk.Entry(popup, textvariable=self.equipment_id_var, **entry_style)
+        self.equipment_entry.grid(row=2, column=1, padx=10, pady=5)
+
+        def check_player_id():
+            player_id = self.player_id_var.get().strip()
+            if not player_id:
+                return
+
+            try:
+                player_id_int = int(player_id)
+            except ValueError:
+                messagebox.showerror("Error", "Player ID must be an integer!")
+                return
+
+            existing_codename = playerIdExist(player_id_int)
+            if existing_codename:
+                self.codename_var.set(existing_codename)
+                codename_entry.config(state="normal")
+                codename_entry.delete(0, "end")
+                codename_entry.insert(0, existing_codename)
+                codename_entry.config(state="disabled")
+                self.equipment_entry.focus()
+            else:
+                self.codename_var.set("")
+                codename_entry.config(state="normal")
+                codename_entry.delete(0, "end")
+                codename_entry.focus()
+
+        player_id_entry.bind("<Return>", lambda e: check_player_id())
+        codename_entry.bind("<Return>", lambda e: self.equipment_entry.focus())
+        self.equipment_entry.bind("<Return>", lambda e: self._handle_new_player(popup))
+
+        tk.Button(popup, text="ADD", command=lambda: self._handle_new_player(popup)).grid(row=3, column=0, columnspan=2, pady=10)
+
+    def _handle_new_player(self, popup):
         # player_id = int(self.player_id_var.get().strip()) #add team and assign player id in next available slot/row
+        player_id = self.player_id_var.get().strip()
         codename = self.codename_var.get().strip()
         equipment_id = self.equipment_id_var.get().strip()
 
-        if not equipment_id:
-            messagebox.showerror("Error", "Equipment ID is required!")
+        if not player_id or not codename or not equipment_id:
+            messagebox.showerror("Error", "All fields are required!")
             return
 
         try:
+            player_id_int = int(player_id)
             equipment_id_int = int(equipment_id)
         except ValueError:
-            messagebox.showerror("Error", "Equipment ID must be integers!")
+            messagebox.showerror("Error", "Player ID and Equipment ID must be integers!")
             return
 
-        existing_codename = playerIdExist(equipment_id_int)
+        existing_codename = playerIdExist(player_id_int)
         if existing_codename:
             codename = existing_codename
             messagebox.showinfo("Player Found", f"Codename: {codename}")
         else:
-            if not codename:
-                messagebox.showerror("Error", "Enter a codename for new player")
-                return
-            insert_player(codename, equipment_id)
+            insert_player(player_id_int, codename, equipment_id_int)
             messagebox.showinfo("Added", "New player added to database")
 
-        player = PlayerEntry(codename, equipment_id_int)
+        player = PlayerEntry(player_id_int, codename, equipment_id_int)
         red_team = (player.equipment_id % 2 == 1)
         green_team = (player.equipment_id % 2 == 0)
 
@@ -307,23 +336,25 @@ class PlayerScreen(tk.Frame):
             self.green_players.append(player)
             self.add_to_team("green", player)
 
-        self.add_to_team(player)
-
         # clear entries
+        self.player_id_var.set("")
         self.codename_var.set("")
         self.equipment_id_var.set("")
+
+        popup.destroy()
+
 
     def add_to_team(self, team: str, player: PlayerEntry):
         if player.equipment_id % 2 == 1:
             if len(self.red_players) < MAX_PLAYERS:
                 self._write_player_to_row("red", player)
-                # self.red_listbox.insert(tk.END, f"{player.codename} (ID:{player.player_id}, EQ:{player.equipment_id})")
+                print(f"{player.codename} (ID: {player.playerId}, EQ: {player.equipment_id})") #in terminal
             else:
                 messagebox.showerror("Error", "Red team full!")
         else:
             if len(self.green_players) < MAX_PLAYERS:
                 self._write_player_to_row("green", player)
-                # self.green_listbox.insert(tk.END,f"{player.codename} (ID:{player.player_id}, EQ:{player.equipment_id})") #in terminal
+                print(f"{player.codename} (ID: {player.playerId}, EQ: {player.equipment_id})") #in terminal
             else:
                 messagebox.showerror("Error", "Green team full!")
 
@@ -350,11 +381,10 @@ class PlayerScreen(tk.Frame):
 
         for row in self.red_rows:
             row["codename"].config(text="")
-            row["equipment"].config(text="")
         for row in self.green_rows:
             row["codename"].config(text="")
-            row["equipment"].config(text="")
 
+        self.player_id_var.set("")
         self.codename_var.set("")
         self.equipment_id_var.set("")
 
