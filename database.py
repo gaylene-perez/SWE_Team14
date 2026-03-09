@@ -12,9 +12,13 @@ try :
   )
 
   cursor = conn.cursor()
-
-  cursor.execute("INSERT INTO players VALUES (2, 'ReaClark', 1)")
-  cursor.execute("INSERT INTO players VALUES (3, 'IndJones', 2)")
+  try:
+      cursor.execute("INSERT INTO players VALUES (2, 'ReaClark')")
+      cursor.execute("INSERT INTO players VALUES (3, 'IndJones')")
+      conn.commit() #save
+  except Exception as e:
+        print(f"Startup insertion warning: {e}")
+        conn.rollback() #clean slate
 
   cursor.execute("SELECT * FROM players")
   records = cursor.fetchall()
@@ -50,11 +54,11 @@ def insert_player(player_id, codename, equipment_id):
     try:
         with conn.cursor() as cursor:
             cursor.execute(
-                "INSERT INTO players (player_id, codename, equipment_id) VALUES (%s, %s, %s)",
+                "INSERT INTO players (player_id, codename) VALUES (%s, %s)",
                 (player_id, codename, equipment_id)
             )
             conn.commit()
-            print(f"Inserted player {player_id} - {codename} - {equipment_id}")
+            print(f"Inserted player {player_id} - {codename}")
             return True #success!
     except Exception as e:
         print(f"Error inserting player: {e}")

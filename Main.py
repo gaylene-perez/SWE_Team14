@@ -28,6 +28,15 @@ class Main:
         # run splash screen first
         self.show_splash()
 
+        #matching player screen to splash screen size
+        width = 1000
+        height = 637
+        screen_width = self.root.winfo_screenwidth()
+        screen_height = self.root.winfo_screenheight()
+        x = int((screen_width / 2) - (width / 2))
+        y = int((screen_height / 2) - (height / 2))
+        self.root.geometry(f"{width}x{height}+{x}+{y}")
+
         # then open player entry screen
         self.open_player_screen()
 
@@ -42,18 +51,8 @@ class Main:
     #button to open player entry screen
     def open_player_screen(self):
         self.screen = PlayerScreen(self.root)
-        self.screen.pack(padx=10, pady=10)
+        self.screen.pack(fill="both", expand=True)
 
-    #PLAYER SCREEN
-        #red team (odd) / green team (even)
-        #max 15 players per team
-
-        #f12 clears all entries
-        #prompt for player id
-            #query database for code name
-            #if not found, allow new name entry to add to database
-
-        #prompt for equipment id that player is using (int)
 
     #GAME
     #f5 or start button moves to next screen (play action screen)

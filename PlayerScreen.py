@@ -23,7 +23,7 @@ MAX_PLAYERS = 15  # max 15 players per team
 
 @dataclass
 class PlayerEntry:
-    playerId: int
+    player_id: int
     codename: str
     equipment_id: int
 
@@ -65,8 +65,8 @@ class PlayerScreen(tk.Frame):
         content.grid(row=0, column=0, sticky="nsew")
 
         content.rowconfigure(0, weight=0)  #title
-        content.rowconfigure(1, weight=0) #team
-        content.rowconfigure(2, weight=1)  #menu
+        content.rowconfigure(1, weight=1) #team
+        content.rowconfigure(2, weight=0)  #menu
         content.columnconfigure(0, weight=1)
 
         # title
@@ -105,7 +105,7 @@ class PlayerScreen(tk.Frame):
 
     def _make_scroll(self, parent, bg: str):
         canvas = tk.Canvas(parent, bg=bg, highlightthickness=0)
-        vbar = tk.Scrollbar(parent, orient="vertical", command=canvas.yview, width=3)
+        vbar = tk.Scrollbar(parent, orient="vertical", command=canvas.yview, width=5)
         canvas.configure(yscrollcommand=vbar.set)
 
         vbar.pack(side="right", fill="y")
@@ -208,17 +208,17 @@ class PlayerScreen(tk.Frame):
                 records = cursor.fetchall()
                 print("DEBUG: records =", records)
 
-            for player_id, codename, equipment_id in records:
-                player = PlayerEntry(player_id, codename, equipment_id)
+            for player_id, codename in records:
+                player = PlayerEntry(player_id, codename, 0)
 
-                if equipment_id % 2 == 1:
-                    if len(self.red_players) < MAX_PLAYERS:
-                        self.red_players.append(player)
-                        self._write_player_to_row("red", player)
-                else:
-                    if len(self.green_players) < MAX_PLAYERS:
-                        self.green_players.append(player)
-                        self._write_player_to_row("green", player)
+                # if equipment_id % 2 == 1:
+                if len(self.red_players) < MAX_PLAYERS:
+                    self.red_players.append(player)
+                    self._write_player_to_row("red", player)
+                # else:
+                elif len(self.green_players) < MAX_PLAYERS:
+                    self.green_players.append(player)
+                    self._write_player_to_row("green", player)
         except Exception as e:
             print(f"Error loading players from database: {e}")
 
@@ -231,7 +231,6 @@ class PlayerScreen(tk.Frame):
         # k = Tk()
         # k.bind("<F12>", self.reset_players()) #bind(event, function)
 
-
     def _write_player_to_row(self, team:str, player:PlayerEntry) -> None:
         rows = self.red_rows if team == "red" else self.green_rows
         index = len(self.red_players) - 1 if team == "red" else len(self.green_players) - 1
@@ -239,85 +238,78 @@ class PlayerScreen(tk.Frame):
         if 0 <= index < len(rows):
             rows[index]["codename"].config(text=player.codename)
 
+    #helper for duplicate check in _handle_new_player
+    def _existing_player(self, player_id):
+        for player in self.red_players + self.green_players:
+            if player.player_id == player_id:
+                return True
+        return False
 
-    # Add player to database and team
-    def add_player(self, event=None):
-        popup = tk.Toplevel(self.master)
-        popup.title("Add Player")
-        popup.configure(bg="black")
-        popup.resizable(width=False, height=False)
+    #duplicate player id helper
+    def _handle_duplicate(self, player_id_int, popup, player_id_entry):
+        messagebox.showerror("Error", f"Player ID {player_id_int} already exists!", parent=popup) #parent=popup: belongs to popup window
 
-        label_style = {"bg": "black", "fg": "white", "font": ("Courier New", 12, "bold")}
-        entry_style = {"bg": "black", "fg": "white", "font": ("Courier New", 12, "bold"), "insertbackground": "white"}
+        # enable input into player id after popup messagve
+        def refocus_player_id():
+            popup.lift()
+            popup.focus_force()
+            player_id_entry.focus_force()
+            player_id_entry.selection_range(0, tk.END)
+            print("DEBUG: duplicate focus =", popup.focus_get())
 
-        tk.Label(popup, text="PLAYER ID:", **label_style).grid(row=0, column=0, padx=10, pady=10, sticky="w")
-        player_id_entry = tk.Entry(popup, textvariable=self.player_id_var, **entry_style)
-        player_id_entry.grid(row=0, column=1, padx=10, pady=5)
-        player_id_entry.focus()
+        popup.after(1, refocus_player_id)
 
-        tk.Label(popup, text="CODENAME:", **label_style).grid(row=1, column=0, padx=10, pady=10, sticky="w")
-        codename_entry = tk.Entry(popup, textvariable=self.codename_var, **entry_style, state="disabled")
-        codename_entry.grid(row=1, column=1, padx=10, pady=5)
+    #new player helper
+    def _handle_new_player(self, popup, player_id_var, codename_var, equipment_id_var, player_id_entry, codename_entry):
+        player_id = player_id_var.get().strip()
+        codename = codename_var.get().strip()
+        equipment_id = equipment_id_var.get().strip()
 
-        tk.Label(popup, text="EQUIPMENT ID:", **label_style).grid(row=2, column=0, padx=10, pady=10, sticky="w")
-        self.equipment_entry = tk.Entry(popup, textvariable=self.equipment_id_var, **entry_style)
-        self.equipment_entry.grid(row=2, column=1, padx=10, pady=5)
-
-        def check_player_id():
-            player_id = self.player_id_var.get().strip()
-            if not player_id:
-                return
-
-            try:
-                player_id_int = int(player_id)
-            except ValueError:
-                messagebox.showerror("Error", "Player ID must be an integer!")
-                return
-
-            existing_codename = playerIdExist(player_id_int)
-            if existing_codename:
-                self.codename_var.set(existing_codename)
-                codename_entry.config(state="normal")
-                codename_entry.delete(0, "end")
-                codename_entry.insert(0, existing_codename)
-                codename_entry.config(state="disabled")
-                self.equipment_entry.focus()
-            else:
-                self.codename_var.set("")
-                codename_entry.config(state="normal")
-                codename_entry.delete(0, "end")
-                codename_entry.focus()
-
-        player_id_entry.bind("<Return>", lambda e: check_player_id())
-        codename_entry.bind("<Return>", lambda e: self.equipment_entry.focus())
-        self.equipment_entry.bind("<Return>", lambda e: self._handle_new_player(popup))
-
-        tk.Button(popup, text="ADD", command=lambda: self._handle_new_player(popup)).grid(row=3, column=0, columnspan=2, pady=10)
-
-    def _handle_new_player(self, popup):
-        # player_id = int(self.player_id_var.get().strip()) #add team and assign player id in next available slot/row
-        player_id = self.player_id_var.get().strip()
-        codename = self.codename_var.get().strip()
-        equipment_id = self.equipment_id_var.get().strip()
-
-        if not player_id or not codename or not equipment_id:
-            messagebox.showerror("Error", "All fields are required!")
+        #player/equipment id cannot be blank
+        if not player_id:
+            messagebox.showerror("Error", "Player ID required!", parent=popup)
+            return
+        if not equipment_id:
+            messagebox.showerror("Error", "Equipment ID required!", parent=popup)
             return
 
+        #integer check for player/equipment
         try:
             player_id_int = int(player_id)
+            # print(f"DEBUG raw player_id='{player_id}' parsed={player_id_int}")
+        except ValueError:
+            messagebox.showerror("Error", "Player ID must be integer!", parent=popup)
+            return
+        try:
             equipment_id_int = int(equipment_id)
         except ValueError:
-            messagebox.showerror("Error", "Player ID and Equipment ID must be integers!")
+            messagebox.showerror("Error", "Equipment ID must be integer!", parent=popup)
+            return
+
+        #no duplicate player id
+        if self._existing_player(player_id_int):
+            self._handle_duplicate(player_id_int, popup, player_id_entry)
             return
 
         existing_codename = playerIdExist(player_id_int)
         if existing_codename:
             codename = existing_codename
-            messagebox.showinfo("Player Found", f"Codename: {codename}")
+            messagebox.showinfo("Player Found", f"Codename: {codename}", parent=popup)
         else:
-            insert_player(player_id_int, codename, equipment_id_int)
-            messagebox.showinfo("Added", "New player added to database")
+            if not codename:
+                messagebox.showerror("Error", "Codename is required for new player!", parent=popup)
+
+                # enable input into codename after popup message
+                def refocus_codename():
+                    popup.lift()
+                    popup.focus_force()
+                    codename_entry.focus_force()
+                    codename_entry.selection_range(0, tk.END)
+
+                popup.after(1, refocus_codename)
+                return
+
+            insert_player(player_id_int, codename)
 
         player = PlayerEntry(player_id_int, codename, equipment_id_int)
         red_team = (player.equipment_id % 2 == 1)
@@ -325,38 +317,95 @@ class PlayerScreen(tk.Frame):
 
         if red_team:
             if len(self.red_players) >= MAX_PLAYERS:
-                messagebox.showerror("Error", "Red team has 15 players!")
+                messagebox.showerror("Error", "Unable to add. Red team full!", parent=popup)
                 return
             self.red_players.append(player)
             self.add_to_team("red", player)
         if green_team:
             if len(self.green_players) >= MAX_PLAYERS:
-                messagebox.showerror("Error", "Green team has 15 players!")
+                messagebox.showerror("Error", "Unable to add. Green team full!", parent=popup)
                 return
             self.green_players.append(player)
             self.add_to_team("green", player)
 
+        if not existing_codename:
+            messagebox.showinfo("Added", "New player added to database", parent=popup)
+
         # clear entries
-        self.player_id_var.set("")
-        self.codename_var.set("")
-        self.equipment_id_var.set("")
+        player_id_var.set("")
+        codename_var.set("")
+        equipment_id_var.set("")
 
         popup.destroy()
 
+    # Add player to database and team
+    def add_player(self, event=None):
+        player_id_var = tk.StringVar()
+        codename_var = tk.StringVar()
+        equipment_id_var = tk.StringVar()
+
+        popup = tk.Toplevel(self.master)
+        popup.title("Add Player")
+        popup.configure(bg="black")
+        popup.resizable(width=False, height=False)
+        popup.transient(self.master)
+        popup.grab_set()
+
+        label_style = {"bg": "black", "fg": "white", "font": ("Courier New", 12, "bold")}
+        entry_style = {"bg": "black", "fg": "white", "font": ("Courier New", 12, "bold"), "insertbackground": "white"}
+
+        tk.Label(popup, text="PLAYER ID:", **label_style).grid(row=0, column=0, padx=10, pady=10, sticky="w")
+        player_id_entry = tk.Entry(popup, textvariable=player_id_var, **entry_style)
+        player_id_entry.grid(row=0, column=1, padx=10, pady=5)
+        player_id_entry.focus()
+
+        tk.Label(popup, text="CODENAME:", **label_style).grid(row=1, column=0, padx=10, pady=10, sticky="w")
+        codename_entry = tk.Entry(popup, textvariable=codename_var, **entry_style)
+        codename_entry.grid(row=1, column=1, padx=10, pady=5)
+
+        tk.Label(popup, text="EQUIPMENT ID:", **label_style).grid(row=2, column=0, padx=10, pady=10, sticky="w")
+        self.equipment_entry = tk.Entry(popup, textvariable=equipment_id_var, **entry_style)
+        self.equipment_entry.grid(row=2, column=1, padx=10, pady=5)
+
+        #player id field check
+        def check_player_id():
+            player_id = player_id_var.get().strip()
+            if not player_id:
+                return
+
+            try:
+                player_id_int = int(player_id)
+            except ValueError:
+                messagebox.showerror("Error", "Player ID must be an integer!", parent=popup)
+                return
+
+            if self._existing_player(player_id_int):
+                self._handle_duplicate(player_id_int, popup, player_id_entry)
+                return
+
+            existing_codename = playerIdExist(player_id_int)
+            if existing_codename:
+                codename_var.set(existing_codename)
+                self.equipment_entry.focus()
+            else:
+                codename_var.set("")
+                codename_entry.focus()
+
+        player_id_entry.bind("<Return>", lambda e: check_player_id())
+        codename_entry.bind("<Return>", lambda e: self.equipment_entry.focus())
+        self.equipment_entry.bind("<Return>", lambda e: self._handle_new_player(popup, player_id_var, codename_var, equipment_id_var, player_id_entry, codename_entry))
+
+        tk.Button(popup, text="ADD", command=lambda: self._handle_new_player(popup, player_id_var, codename_var, equipment_id_var, player_id_entry, codename_entry)).grid(row=3, column=0, columnspan=2, pady=10)
+
 
     def add_to_team(self, team: str, player: PlayerEntry):
-        if player.equipment_id % 2 == 1:
-            if len(self.red_players) < MAX_PLAYERS:
-                self._write_player_to_row("red", player)
-                print(f"{player.codename} (ID: {player.playerId}, EQ: {player.equipment_id})") #in terminal
-            else:
-                messagebox.showerror("Error", "Red team full!")
+        if team == "red":
+            self._write_player_to_row("red", player)
+        elif team == "green":
+            self._write_player_to_row("green", player)
         else:
-            if len(self.green_players) < MAX_PLAYERS:
-                self._write_player_to_row("green", player)
-                print(f"{player.codename} (ID: {player.playerId}, EQ: {player.equipment_id})") #in terminal
-            else:
-                messagebox.showerror("Error", "Green team full!")
+            return
+        print(f"{player.codename} (ID: {player.player_id}, EQ: {player.equipment_id})")  # in terminal
 
     # Remove selected player
     # def remove_player(self):
@@ -419,8 +468,19 @@ class PlayerScreen(tk.Frame):
 if __name__ == "__main__":
     root = tk.Tk()
     root.title("PLAYER SCREEN")
-    # root.geometry("900x500")
-    root.state("zoomed")
+
+    #trying to match splash screen
+    width = 1000
+    height = 637
+
+    screen_width = root.winfo_screenwidth()
+    screen_height = root.winfo_screenheight()
+
+    x = int((screen_width / 2) - (width / 2))
+    y = int((screen_height / 2) - (height / 2))
+
+    root.geometry(f"{width}x{height}+{x}+{y}")
+
     screen = PlayerScreen(root)
     screen.pack(fill="both", expand=True)
 
