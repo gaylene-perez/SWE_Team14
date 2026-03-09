@@ -55,7 +55,7 @@ def insert_player(player_id, codename, equipment_id):
         with conn.cursor() as cursor:
             cursor.execute(
                 "INSERT INTO players (player_id, codename) VALUES (%s, %s)",
-                (player_id, codename, equipment_id)
+                (player_id, codename)
             )
             conn.commit()
             print(f"Inserted player {player_id} - {codename}")
