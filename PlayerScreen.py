@@ -48,7 +48,7 @@ class PlayerScreen(tk.Frame):
 
         self._style()
         self._ui()
-        self._load_players_from_db()
+        # self._load_players_from_db()
         self._key_input()
 
     def _style(self) -> None:
@@ -97,10 +97,11 @@ class PlayerScreen(tk.Frame):
         for i in range(5):
             menu.columnconfigure(i, weight=1)
         self._menu(menu, 0, "F1\nAdd\nPlayer", self.add_player)
-        self._menu(menu, 1, "F5\nStart\nGame", self.start_game)
-        self._menu(menu, 2, "F10\nSwitch\nNetwork", self.switch_network)
-        self._menu(menu, 3, "F12\nClear\nPlayers", self.reset_players)
-        self._menu(menu, 4, "ESC\nExit", self.quit)
+        self._menu(menu, 1, "F2\nLoad\nPlayers", self._load_players_from_db)
+        self._menu(menu, 2, "F5\nStart\nGame", self.start_game)
+        self._menu(menu, 3, "F10\nSwitch\nNetwork", self.switch_network)
+        self._menu(menu, 4, "F12\nClear\nPlayers", self.reset_players)
+        self._menu(menu, 5, "ESC\nExit", self.quit)
         # button = tk.Button(self, text="CLICK TO SWITCH NETWORKS", command=self.switch_network, fg="blue", bg="light gray", height=2, width=25)
 
     def _make_scroll(self, parent, bg: str):
@@ -208,8 +209,8 @@ class PlayerScreen(tk.Frame):
                 records = cursor.fetchall()
                 print("DEBUG: records =", records)
 
-            for player_id, codename in records:
-                player = PlayerEntry(player_id, codename, 0)
+            for player_id, codename, equipment_id in records:
+                player = PlayerEntry(player_id, codename, equipment_id)
 
                 # if equipment_id % 2 == 1:
                 if len(self.red_players) < MAX_PLAYERS:
@@ -224,6 +225,7 @@ class PlayerScreen(tk.Frame):
 
     def _key_input(self, event=None):
         self.master.bind("<F1>", self.add_player)
+        self.master.bind("<F2>", self._load_players_from_db)
         self.master.bind("<F5>", lambda e: self.start_game())
         self.master.bind("<F12>", self.reset_players)
         self.master.bind("<Escape>", lambda e: self.quit())
@@ -406,22 +408,6 @@ class PlayerScreen(tk.Frame):
         else:
             return
         print(f"{player.codename} (ID: {player.player_id}, EQ: {player.equipment_id})")  # in terminal
-
-    # Remove selected player
-    # def remove_player(self):
-    #     red_index = self.red_listbox.curselection()
-    #     green_index = self.green_listbox.curselection()
-    #
-    #     if red_index:
-    #         idx = red_index[0]
-    #         self.red_listbox.delete(idx)
-    #         self.red_players.pop(idx)
-    #     elif green_index:
-    #         idx = green_index[0]
-    #         self.green_listbox.delete(idx)
-    #         self.green_players.pop(idx)
-    #     else:
-    #         messagebox.showinfo("Remove Player", "Select a player to remove first.")
 
     # Reset all players
     def reset_players(self, event=None) -> None:
