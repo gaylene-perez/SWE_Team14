@@ -455,8 +455,7 @@ class PlayerScreen(tk.Frame):
         content.rowconfigure(0, weight=1) #score
         content.rowconfigure(1, weight=1) #action
         content.rowconfigure(2, weight=0) #Time remaining
-        content.columnconfigure(0, wieght=1)
-        
+        content.columnconfigure(0, weight=1)
         
         root.mainloop()
 
