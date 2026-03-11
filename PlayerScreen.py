@@ -445,6 +445,19 @@ class PlayerScreen(tk.Frame):
         root = tk.Tk()
         root.title("PLAY GAME")
         root.geometry("900x500")
+        
+        root.rowconfigure(0, weight=1)
+        root.columnconfigure(0, weight=1)
+
+        content = tk.Frame(root, bg="black")
+        content.grid(row=0, column=0, sticky="nsew")
+
+        content.rowconfigure(0, weight=1) #score
+        content.rowconfigure(1, weight=1) #action
+        content.rowconfigure(2, weight=0) #Time remaining
+        content.columnconfigure(0, wieght=1)
+        
+        
         root.mainloop()
 
     # change IP address
