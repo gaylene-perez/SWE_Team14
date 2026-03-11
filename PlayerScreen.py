@@ -459,15 +459,15 @@ class PlayerScreen(tk.Frame):
         action_content.columnconfigure(0, weight=1)
 
         #score
-        score = tk.Frame(content, bg="black")
+        score = tk.Frame(action_content, bg="black")
         score.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
         
         #action
-        action = tk.Frame(content, bg="blue")
+        action = tk.Frame(action_content, bg="blue")
         score.grid(row=1, column=0, padx=10, pady=10, sticky="nsew")
 
         #Time remianing
-        timer = tk.Frame(content, bg="black")
+        timer = tk.Frame(action_content, bg="black")
         timer.grid(row=2, column=0, padx=10, pady=10, sticky="nsew")
         
         root.mainloop()
