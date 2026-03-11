@@ -462,7 +462,7 @@ class PlayerScreen(tk.Frame):
         
 
         #action
-        action = tk.frame(content, bg="blue")
+        action = tk.Frame(content, bg="blue")
 
         #Time remianing
         
