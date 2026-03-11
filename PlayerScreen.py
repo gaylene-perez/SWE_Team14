@@ -449,6 +449,8 @@ class PlayerScreen(tk.Frame):
         # Player Action Screen
         root.rowconfigure(0, weight=1)
         root.columnconfigure(0, weight=1)
+        root.master.rowconfigure(0, weight=1)
+        root.master.columnconfigure(0, weight=1)
 
         content = tk.Frame(root, bg="black")
         content.grid(row=0, column=0, sticky="nsew")
