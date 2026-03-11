@@ -438,60 +438,42 @@ class PlayerScreen(BaseMenu):
         self.codename_var.set("")
         self.equipment_id_var.set("")
 
-<<<<<<< HEAD
-
-    def start_game(self, event=None):
-        # messagebox.showinfo("Start Game", "Not wired yet.")
-        """Code up f5 key or equivalent to switch to play action display and start game (you can do this in
-        the original window or start another window)"""
-        root = tk.Tk()
-        root.title("PLAY GAME")
-        root.geometry("900x500")
-
-        # Player Action Screen
-        root.rowconfigure(0, weight=1)
-        root.columnconfigure(0, weight=1)
-
-        action_content = tk.Frame(root, bg="black")
-        action_content.grid(row=0, column=0, sticky="nsew")
-
-        action_content.rowconfigure(0, weight=1) #score
-        action_content.rowconfigure(1, weight=1) #action
-        action_content.rowconfigure(2, weight=0) #Time remaining
-        action_content.columnconfigure(0, weight=1)
-
-        #score
-        score = tk.Frame(action_content, bg="black")
-        score.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
-        
-        #action
-        action = tk.Frame(action_content, bg="blue")
-        score.grid(row=1, column=0, padx=10, pady=10, sticky="nsew")
-
-        #Time remianing
-        timer = tk.Frame(action_content, bg="black")
-        timer.grid(row=2, column=0, padx=10, pady=10, sticky="nsew")
-        
-        root.mainloop()
-
-    # change IP address
-    def switch_network(self):
-        # temp = self.ip
-        # self.ip = simpledialog.askstring("Input", f"Current IP address: {self.ip}\nPlease enter a valid IP address:", parent=root)
-        #
-        # if self.ip is None:
-        #     self.ip = temp
-        #
-        # return self.ip
-        ip = simpledialog.askstring("Switch Network", f"Current IP: {self.ip}\nEnter new IP:")
-        if ip:
-            self.ip = ip
-            messagebox.showinfo("Network Changed", f"New IP: {self.ip}")
-
-=======
->>>>>>> feat/gp
-    def quit(self):
+    def quit(selfself):
         self.master.destroy()
+
+    # def start_game(self, event=None):
+    #     # messagebox.showinfo("Start Game", "Not wired yet.")
+    #     """Code up f5 key or equivalent to switch to play action display and start game (you can do this in
+    #     the original window or start another window)"""
+    #     root = tk.Tk()
+    #     root.title("PLAY GAME")
+    #     root.geometry("900x500")
+    #
+    #     # Player Action Screen
+    #     root.rowconfigure(0, weight=1)
+    #     root.columnconfigure(0, weight=1)
+    #
+    #     action_content = tk.Frame(root, bg="black")
+    #     action_content.grid(row=0, column=0, sticky="nsew")
+    #
+    #     action_content.rowconfigure(0, weight=1) #score
+    #     action_content.rowconfigure(1, weight=1) #action
+    #     action_content.rowconfigure(2, weight=0) #Time remaining
+    #     action_content.columnconfigure(0, weight=1)
+    #
+    #     #score
+    #     score = tk.Frame(action_content, bg="black")
+    #     score.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
+    #
+    #     #action
+    #     action = tk.Frame(action_content, bg="blue")
+    #     score.grid(row=1, column=0, padx=10, pady=10, sticky="nsew")
+    #
+    #     #Time remianing
+    #     timer = tk.Frame(action_content, bg="black")
+    #     timer.grid(row=2, column=0, padx=10, pady=10, sticky="nsew")
+    #
+    #     root.mainloop()
 
 
 if __name__ == "__main__":
