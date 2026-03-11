@@ -5,6 +5,7 @@ from typing import List
 
 import database
 from database import insert_player, playerIdExist
+from BaseMenu import BaseMenu
 
 # PLAYER SCREEN
 # red team (odd eq id) / green team (even eq id)
@@ -29,7 +30,7 @@ class PlayerEntry:
 
 
 # PLAYER SCREEN
-class PlayerScreen(tk.Frame):
+class PlayerScreen(BaseMenu):
     ip = "127.0.0.1"
 
     def __init__(self, master):
@@ -48,8 +49,6 @@ class PlayerScreen(tk.Frame):
 
         self._style()
         self._ui()
-        self._load_players_from_db()
-        self._key_input()
 
     def _style(self) -> None:
         self.master.config(background="black")
@@ -91,16 +90,19 @@ class PlayerScreen(tk.Frame):
         self._build_rows(red_panel, team="red")
         self._build_rows(green_panel, team="green")
 
-        # menu
-        menu = tk.Frame(content, bg="black")
-        menu.grid(row=2, column=0, sticky="ew", padx=16, pady=(0, 12))
-        for i in range(5):
-            menu.columnconfigure(i, weight=1)
-        self._menu(menu, 0, "F1\nAdd\nPlayer", self.add_player)
-        self._menu(menu, 1, "F5\nStart\nGame", self.start_game)
-        self._menu(menu, 2, "F10\nSwitch\nNetwork", self.switch_network)
-        self._menu(menu, 3, "F12\nClear\nPlayers", self.reset_players)
-        self._menu(menu, 4, "ESC\nExit", self.quit)
+        super()._ui(content) #base menu
+
+        # # menu
+        # menu = tk.Frame(content, bg="black")
+        # menu.grid(row=2, column=0, sticky="ew", padx=16, pady=(0, 12))
+        # for i in range(6):
+        #     menu.columnconfigure(i, weight=1)
+        # self._menu(menu, 0, "F1\nAdd\nPlayer", self.add_player)
+        # self._menu(menu, 1, "F2\nLoad\nPlayers", self.load_players_from_db)
+        # self._menu(menu, 2, "F5\nStart\nGame", self.start_game)
+        # self._menu(menu, 3, "F10\nSwitch\nNetwork", self.switch_network)
+        # self._menu(menu, 4, "F12\nClear\nPlayers", self.reset_players)
+        # self._menu(menu, 5, "ESC\nExit", self.quit)
         # button = tk.Button(self, text="CLICK TO SWITCH NETWORKS", command=self.switch_network, fg="blue", bg="light gray", height=2, width=25)
 
     def _make_scroll(self, parent, bg: str):
@@ -141,11 +143,9 @@ class PlayerScreen(tk.Frame):
 
         return canvas, inner
 
-
-    def _menu(self, parent, col: int, text: str, cmd) -> None:
-        bn = tk.Button(parent, text=text, command=cmd, fg="blue", bg="#8a8a8a", activebackground="#9a9a9a", relief="ridge", bd=2, font=("Courier New", 10, "bold"), height=3)
-        bn.grid(row=0, column=col, padx=6, pady=8, sticky="ew")
-
+    # def _menu(self, parent, col: int, text: str, cmd) -> None:
+    #     bn = tk.Button(parent, text=text, command=cmd, fg="blue", bg="#8a8a8a", activebackground="#9a9a9a", relief="ridge", bd=2, font=("Courier New", 10, "bold"), height=3)
+    #     bn.grid(row=0, column=col, padx=6, pady=8, sticky="ew")
 
     def _team_panel(self, parent, title:str, bg="black", accent="white") -> tk.Frame:
         panel = tk.Frame(parent, bg=bg, bd=2, relief="groove")
@@ -195,41 +195,13 @@ class PlayerScreen(tk.Frame):
         else:
             self.green_rows = rows
 
-    def _load_players_from_db(self):
-        print("DEBUG: database.conn =", database.conn)
-
-        if not database.conn:
-            return
-
-        try:
-            print("DEBUG: Loading players from DB...")
-            with database.conn.cursor() as cursor:
-                cursor.execute("SELECT * FROM players")
-                records = cursor.fetchall()
-                print("DEBUG: records =", records)
-
-            for player_id, codename in records:
-                player = PlayerEntry(player_id, codename, 0)
-
-                # if equipment_id % 2 == 1:
-                if len(self.red_players) < MAX_PLAYERS:
-                    self.red_players.append(player)
-                    self._write_player_to_row("red", player)
-                # else:
-                elif len(self.green_players) < MAX_PLAYERS:
-                    self.green_players.append(player)
-                    self._write_player_to_row("green", player)
-        except Exception as e:
-            print(f"Error loading players from database: {e}")
-
-    def _key_input(self, event=None):
-        self.master.bind("<F1>", self.add_player)
-        self.master.bind("<F5>", lambda e: self.start_game())
-        self.master.bind("<F12>", self.reset_players)
-        self.master.bind("<Escape>", lambda e: self.quit())
-
-        # k = Tk()
-        # k.bind("<F12>", self.reset_players()) #bind(event, function)
+    # def _key_input(self, event=None):
+    #     self.master.bind("<F1>", self.add_player)
+    #     self.master.bind("<F2>", self.load_players_from_db)
+    #     self.master.bind("<F5>", lambda e: self.start_game())
+    #     self.master.bind("<F10>", self.switch_network)
+    #     self.master.bind("<F12>", self.reset_players)
+    #     self.master.bind("<Escape>", lambda e: self.quit())
 
     def _write_player_to_row(self, team:str, player:PlayerEntry) -> None:
         rows = self.red_rows if team == "red" else self.green_rows
@@ -320,13 +292,13 @@ class PlayerScreen(tk.Frame):
                 messagebox.showerror("Error", "Unable to add. Red team full!", parent=popup)
                 return
             self.red_players.append(player)
-            self.add_to_team("red", player)
+            self._add_to_team("red", player)
         if green_team:
             if len(self.green_players) >= MAX_PLAYERS:
                 messagebox.showerror("Error", "Unable to add. Green team full!", parent=popup)
                 return
             self.green_players.append(player)
-            self.add_to_team("green", player)
+            self._add_to_team("green", player)
 
         if not existing_codename:
             messagebox.showinfo("Added", "New player added to database", parent=popup)
@@ -337,6 +309,15 @@ class PlayerScreen(tk.Frame):
         equipment_id_var.set("")
 
         popup.destroy()
+
+    def _add_to_team(self, team: str, player: PlayerEntry):
+        if team == "red":
+            self._write_player_to_row("red", player)
+        elif team == "green":
+            self._write_player_to_row("green", player)
+        else:
+            return
+        print(f"{player.codename} (ID: {player.player_id}, EQ: {player.equipment_id})")  #in terminal
 
     # Add player to database and team
     def add_player(self, event=None):
@@ -397,31 +378,51 @@ class PlayerScreen(tk.Frame):
 
         tk.Button(popup, text="ADD", command=lambda: self._handle_new_player(popup, player_id_var, codename_var, equipment_id_var, player_id_entry, codename_entry)).grid(row=3, column=0, columnspan=2, pady=10)
 
+    def load_players_from_db(self):
+        print("DEBUG: database.conn =", database.conn)
 
-    def add_to_team(self, team: str, player: PlayerEntry):
-        if team == "red":
-            self._write_player_to_row("red", player)
-        elif team == "green":
-            self._write_player_to_row("green", player)
-        else:
+        if not database.conn:
             return
-        print(f"{player.codename} (ID: {player.player_id}, EQ: {player.equipment_id})")  # in terminal
 
-    # Remove selected player
-    # def remove_player(self):
-    #     red_index = self.red_listbox.curselection()
-    #     green_index = self.green_listbox.curselection()
-    #
-    #     if red_index:
-    #         idx = red_index[0]
-    #         self.red_listbox.delete(idx)
-    #         self.red_players.pop(idx)
-    #     elif green_index:
-    #         idx = green_index[0]
-    #         self.green_listbox.delete(idx)
-    #         self.green_players.pop(idx)
-    #     else:
-    #         messagebox.showinfo("Remove Player", "Select a player to remove first.")
+        try:
+            print("DEBUG: Loading players from DB...")
+            with database.conn.cursor() as cursor:
+                cursor.execute("SELECT * FROM players")
+                records = cursor.fetchall()
+                print("DEBUG: records =", records)
+
+            for player_id, codename, equipment_id in records:
+                player = PlayerEntry(player_id, codename, equipment_id)
+
+                # if equipment_id % 2 == 1:
+                if len(self.red_players) < MAX_PLAYERS:
+                    self.red_players.append(player)
+                    self._write_player_to_row("red", player)
+                # else:
+                elif len(self.green_players) < MAX_PLAYERS:
+                    self.green_players.append(player)
+                    self._write_player_to_row("green", player)
+        except Exception as e:
+            print(f"Error loading players from database: {e}")
+
+    def start_game(self, event=None):
+        # messagebox.showinfo("Start Game", "Not wired yet.")
+        """Code up f5 key or equivalent to switch to play action display and start game (you can do this in
+        the original window or start another window)"""
+        play_window = tk.Toplevel(self.master)
+        play_window.title("PLAY GAME")
+        play_window.resizable(width=False, height=False)
+        # root = tk.Tk()
+        # root.title("PLAY GAME")
+        # root.geometry("900x500")
+        # root.mainloop()
+
+    # change IP address
+    def switch_network(self, event=None):
+        ip = simpledialog.askstring("Switch Network", f"Current IP: {self.ip}\nEnter new IP:")
+        if ip:
+            self.ip = ip
+            messagebox.showinfo("Network Changed", f"New IP: {self.ip}")
 
     # Reset all players
     def reset_players(self, event=None) -> None:
@@ -437,6 +438,7 @@ class PlayerScreen(tk.Frame):
         self.codename_var.set("")
         self.equipment_id_var.set("")
 
+<<<<<<< HEAD
 
     def start_game(self, event=None):
         # messagebox.showinfo("Start Game", "Not wired yet.")
@@ -486,6 +488,8 @@ class PlayerScreen(tk.Frame):
             self.ip = ip
             messagebox.showinfo("Network Changed", f"New IP: {self.ip}")
 
+=======
+>>>>>>> feat/gp
     def quit(self):
         self.master.destroy()
 

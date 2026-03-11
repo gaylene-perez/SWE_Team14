@@ -13,8 +13,10 @@ try :
 
   cursor = conn.cursor()
   try:
-      cursor.execute("INSERT INTO players VALUES (2, 'ReaClark')")
-      cursor.execute("INSERT INTO players VALUES (3, 'IndJones')")
+      # cursor.execute("INSERT INTO players VALUES (2, 'ReaClark')")
+      # cursor.execute("INSERT INTO players VALUES (3, 'IndJones')")
+      cursor.execute("INSERT INTO players (player_id, codename) ", "SELECT %s, %s WHERE NOT EXISTS" , "SELECT 1 FROM players where player_id = %s", (2, 'ReaClark', 2) )
+      cursor.execute("INSERT INTO players (player_id, codename) ", "SELECT %s, %s WHERE NOT EXISTS" , "SELECT 1 FROM players where player_id = %s", (3, 'IndJones', 3) )
       conn.commit() #save
   except Exception as e:
         print(f"Startup insertion warning: {e}")
@@ -48,7 +50,7 @@ def playerIdExist(player_id):
         print(f"Error checking player ID: {e}")
         return None
 
-def insert_player(player_id, codename, equipment_id):
+def insert_player(player_id, codename):
     if not conn:
         return False #explicit result
     try:
