@@ -450,13 +450,13 @@ class PlayerScreen(tk.Frame):
         root.rowconfigure(0, weight=1)
         root.columnconfigure(0, weight=1)
 
-        content = tk.Frame(root, bg="black")
-        content.grid(row=0, column=0, sticky="nsew")
+        action_content = tk.Frame(root, bg="black")
+        action_content.grid(row=0, column=0, sticky="nsew")
 
-        content.rowconfigure(0, weight=1) #score
-        content.rowconfigure(1, weight=1) #action
-        content.rowconfigure(2, weight=0) #Time remaining
-        content.columnconfigure(0, weight=1)
+        action_content.rowconfigure(0, weight=1) #score
+        action_content.rowconfigure(1, weight=1) #action
+        action_content.rowconfigure(2, weight=0) #Time remaining
+        action_content.columnconfigure(0, weight=1)
 
         #score
         score = tk.Frame(content, bg="black")
