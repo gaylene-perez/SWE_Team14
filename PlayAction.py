@@ -81,7 +81,7 @@ class PlayAction(BaseMenu):
 
         #green_total = tk.Label()
         #green_total.grid()
-        pass
+        # pass
 
     def game_action(self, parent):
         #similar to last function but now this parft is the section showing the live log
@@ -97,12 +97,12 @@ class PlayAction(BaseMenu):
         #--listbox--
         # self.action_listbox = tk.Listbox(log, bg="blue", fg="white", font="Courier New", 16, "bold"), relief="flat", borderwidth=0)
         # self.action_listbox.grid(row=0, column=0, sticky="nsew")
-        pass
+        # pass
 
     def countdown_timer(self, parent):
 
         timer = tk.Frame(self, bg="black")
         timer.grid(row=2, column=0, padx=20, pady=10, sticky="nsew")
         
-        pass
+        # pass
 
