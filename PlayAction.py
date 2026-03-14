@@ -102,7 +102,7 @@ class PlayAction(BaseMenu):
     def countdown_timer(self, parent):
 
         timer = tk.Frame(self, bg="black")
-        timer.grid(row=2, column=0, sticky="nsew", padx=30, pady=10)
+        timer.grid(row=2, column=0, sticky="nsew", padx=20, pady=10)
         
         pass
 
