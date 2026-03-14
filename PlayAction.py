@@ -42,6 +42,7 @@ class PlayAction(BaseMenu):
         #showing one example here so you have an idea on what this outline needs to be filled out with
         # score = tk.Frame(self, bg="black")
         # score.grid(row=0, column=0, sticky="nsew", padx=20, pady=10)
+        
         current_score = tk.Frame(self, bg="black")
         current_score.grid(row=0, column=0, padx=20, pady=10, sticky="nsew")
 
@@ -49,15 +50,23 @@ class PlayAction(BaseMenu):
         #here needing score.rowconfigure(x, weight=y) or score.columnconfigure(m, weight=n)
         
         #title row
+        current_score.rowcongigure(0, weight=0)
         #team row
+        current_score.rowconfigure(1, weight=1)
         #score row
+        current_score.rowconfigure(2, weight=2)
         #red column
+        current_score.columnconfigure(0, weight=1)
         #green column
+        current_score.columnconfigure(1, weight=1)
 
         #--title: CURRENT SCORES--
         #fg means foreground, bg means background
         #title label (score, text=, font=("Courier New", size, "bold"), fg=, bg=)
         #add label to grid, so title.grid()
+
+        title = tk.Label(current_score, text="Current Scores", font=("Courier New", 20, "bold"), fg="white", bg="black")
+        title.grid(row=0, column=1, padx=20, pady=10, sticky="e")
 
         #--red team panel (left)--
         #frame
