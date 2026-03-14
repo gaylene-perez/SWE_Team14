@@ -43,7 +43,7 @@ class PlayAction(BaseMenu):
         # score = tk.Frame(self, bg="black")
         # score.grid(row=0, column=0, sticky="nsew", padx=20, pady=10)
         current_score = tk.Frame(self, bg="black")
-        current_score.grid(row=0, column=0, sticky="nsew", padx=20, pady=10)
+        current_score.grid(row=0, column=0, padx=20, pady=10, sticky="nsew")
 
         #--scoreboard rows/columns--
         #here needing score.rowconfigure(x, weight=y) or score.columnconfigure(m, weight=n)
@@ -88,7 +88,7 @@ class PlayAction(BaseMenu):
         #action = tk.Frame(self, bg="blue")
         #action.grid(row=1, column=0, sticky="nsew", padx=20, pady=10)
         current_action = tk.Frame(self, bg="blue")
-        current_action.grid(row=1, column=0, sticky="nsew", padx=20, pady=10)
+        current_action.grid(row=1, column=0, padx=20, pady=10, sticky="nsew")
 
         #--title--
 
@@ -102,7 +102,7 @@ class PlayAction(BaseMenu):
     def countdown_timer(self, parent):
 
         timer = tk.Frame(self, bg="black")
-        timer.grid(row=2, column=0, sticky="nsew", padx=20, pady=10)
+        timer.grid(row=2, column=0, padx=20, pady=10, sticky="nsew")
         
         pass
 
