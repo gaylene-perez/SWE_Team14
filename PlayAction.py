@@ -84,9 +84,11 @@ class PlayAction(BaseMenu):
         pass
 
     def game_action(self, parent):
-        #similar to las t function but now this parft is the section showing the live log
+        #similar to last function but now this parft is the section showing the live log
         #action = tk.Frame(self, bg="blue")
         #action.grid(row=1, column=0, sticky="nsew", padx=20, pady=10)
+        current_action = tk.Frame(self, bg="blue")
+        current_action.grid(row=1, column=0, sticky="nsew", padx=20, pady=10)
 
         #--title--
 
@@ -98,5 +100,9 @@ class PlayAction(BaseMenu):
         pass
 
     def countdown_timer(self, parent):
+
+        timer = tk.Frame(self, bg="black")
+        timer.grid(row=2, column=0, sticky="nsew", padx=30, pady=10)
+        
         pass
 
