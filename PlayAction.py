@@ -42,11 +42,12 @@ class PlayAction(BaseMenu):
         #showing one example here so you have an idea on what this outline needs to be filled out with
         # score = tk.Frame(self, bg="black")
         # score.grid(row=0, column=0, sticky="nsew", padx=20, pady=10)
-        current_score = tk.Frame(self, bg"black")
+        current_score = tk.Frame(self, bg="black")
         current_score.grid(row=0, column=0, sticky="nsew", padx=20, pady=10)
 
         #--scoreboard rows/columns--
         #here needing score.rowconfigure(x, weight=y) or score.columnconfigure(m, weight=n)
+        
         #title row
         #team row
         #score row
