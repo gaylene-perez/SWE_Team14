@@ -51,12 +51,16 @@ class PlayAction(BaseMenu):
         
         #title row
         current_score.rowcongigure(0, weight=0)
+        
         #team row
         current_score.rowconfigure(1, weight=1)
+        
         #score row
         current_score.rowconfigure(2, weight=2)
+        
         #red column
         current_score.columnconfigure(0, weight=1)
+        
         #green column
         current_score.columnconfigure(1, weight=1)
 
@@ -65,8 +69,13 @@ class PlayAction(BaseMenu):
         #title label (score, text=, font=("Courier New", size, "bold"), fg=, bg=)
         #add label to grid, so title.grid()
 
-        title = tk.Label(current_score, text="Current Scores", font=("Courier New", 20, "bold"), fg="white", bg="black")
-        title.grid(row=0, column=1, padx=20, pady=10, sticky="e")
+        # title1 = Current Scores
+        title1 = tk.Label(current_score, text="Current Scores", font=("Courier New", 20, "bold"), fg="green", bg="black")
+        title1.grid(row=0, column=1, padx=20, pady=10, sticky="e") # alligned right
+        
+        # title2 = XP
+        title2 = tk.Label(current_score, text="XP", font=("Courier New", 20, "bold"), fg="red", bg="black")
+        title2.grid(row=0, column=0, padx=20, pady=10, sticky="w") # alligned left
 
         #--red team panel (left)--
         #frame
