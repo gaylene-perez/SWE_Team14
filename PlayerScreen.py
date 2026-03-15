@@ -410,31 +410,18 @@ class PlayerScreen(BaseMenu):
         # messagebox.showinfo("Start Game", "Not wired yet.")
         """Code up f5 key or equivalent to switch to play action display and start game (you can do this in
         the original window or start another window)"""
-        # play_window = tk.Toplevel(self.master)
-        # play_window.title("PLAY GAME")
-        # play_window.resizable(width=False, height=False)
-        # root.title("PLAY GAME")
-        # root.geometry("900x500")
-        # root.mainloop()
-        root = tk.Tk()
-        root.title("GAME SCREEN")
+        play_window = tk.Toplevel(self.master)
+        play_window.title("PLAY GAME")
+        #root.title("PLAY GAME")
+        play_window.geometry("1000x637")
+        #root.mainloop()
+        
 
-        #trying to match splash screen
-        width = 1000
-        height = 637
-
-        screen_width = root.winfo_screenwidth()
-        screen_height = root.winfo_screenheight()
-
-        x = int((screen_width / 2) - (width / 2))
-        y = int((screen_height / 2) - (height / 2))
-
-        root.geometry(f"{width}x{height}+{x}+{y}")
-
-        screen = PlayAction(root)
+        screen = PlayAction(play_window, red_players=self.red_players, green_players=self.green_players)
         screen.pack(fill="both", expand=True)
 
-        root.mainloop()
+        #root.mainloop()
+
 
     # change IP address
     def switch_network(self, event=None):
@@ -1023,3 +1010,4 @@ if __name__ == "__main__":
 
     root.mainloop()
 """
+
