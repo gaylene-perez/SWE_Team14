@@ -1,3 +1,4 @@
+"""
 import tkinter as tk
 
 class BaseMenu(tk.Frame):
@@ -36,8 +37,8 @@ class BaseMenu(tk.Frame):
         self.master.bind("<F10>", self.switch_network)
         self.master.bind("<F12>", self.reset_players)
         self.master.bind("<Escape>", lambda e: self.quit)
-
 """
+
 import tkinter as tk
 
 class BaseMenu(tk.Frame):
@@ -76,4 +77,5 @@ class BaseMenu(tk.Frame):
     #     self.master.bind("<F10>", self.switch_network)
     #     self.master.bind("<F12>", self.reset_players)
     #     self.master.bind("<Escape>", lambda e: self.quit)
+
 """
