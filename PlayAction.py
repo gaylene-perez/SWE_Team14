@@ -209,6 +209,9 @@ class PlayAction(BaseMenu):
         
         #score row
         current_score.rowconfigure(2, weight=2)
+
+        #total row
+        current_score.rowconfigure(3, weight=0)
         
         #red column
         current_score.columnconfigure(0, weight=1)
@@ -261,9 +264,14 @@ class PlayAction(BaseMenu):
         #--team totals--
         #red_total = tk.Label()
         #red_total.grid()
+        red_total = tk.Label(current_score, text="0", font=("Courier New", 20, "bold"), fg="red", bg="black")
+        red_total.grid(row=3, column=0, padx=20, pady=10, sticky="se")
 
         #green_total = tk.Label()
         #green_total.grid()
+        green_total = tk.Label(current_score, text="0", font="Courier New", 20, "bold"), fg="green", bg="black")
+        green_total.grid(row=3, column=1, padx=20, pady=10, sticky="se")
+        
         # pass
 
     def game_action(self, parent):
