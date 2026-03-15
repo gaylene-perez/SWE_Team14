@@ -160,6 +160,11 @@ class PlayAction(tk.Frame):
         self.red_players = red_players if red_players else []
         self.green_players = green_players if green_players else []
 
+        #count down timer code: 
+        self.time_left = 30
+        self.timer_running = False
+        self.timer_label = None
+
         self._style()
         self._ui()
 
@@ -273,8 +278,50 @@ class PlayAction(tk.Frame):
         timer = tk.Frame(parent, bg="black")
         timer.grid(row=2, column=0, padx=20, pady=10, sticky="nsew")
 
+        timer.columnconfigure(0, weight=1)
+        timer.columnconfigure(1, weight=1)
+
         timer_title = tk.Label(timer, text="Time Remaining:", font=("Courier New", 20, "bold"), fg="white", bg="black")
         timer_title.grid(row=0, column=0, padx=20, pady=10, sticky="e")
+
+        self.timer_label = tk.Label(
+            timer,
+            text=self.format_time(self.time_left), 
+            font=("Courier New", 20, "bold"),
+            fg="yellow", 
+            bg="black"
+        )
+        self.timer_label.grid(row=0, column=1, padx=20, pady=10, sticky="w")
+
+        #testing the timer: 
+        start_button = tk.Button(
+            timer,
+            text="Start Timer",
+            font=("Courier New", 12, "bold"),
+            command=self.start_timer
+        )
+        start_button.grid(row=1, column=0, columnspan=2, pady=5)
+
+    def format_time(self, seconds):
+        minutes = seconds // 60
+        secs = seconds % 60
+        return f"{minutes:02d}:{secs:02d}"
+
+    def start_timer(self):
+        if not self.timer_running:
+            self.timer_running = True
+            self.update_timer()
+
+    def update_timer(self):
+        if self.timer_running:
+            self.timer_label.config(text=self.format_time(self.time_left))
+
+            if self.time_left == 0:
+                self.timer_label.config(text="GO!")
+                self.timer_running = False
+            else:
+                self.time_left -= 1
+                self.after(1000, self.update_timer)
 
 
 if __name__ == "__main__":
