@@ -174,9 +174,9 @@ class PlayAction(BaseMenu):
         content = tk.Frame(self, bg="black")
         content.grid(row=0, column=0, sticky="nsew")
 
-        content.rowconfigure(0, weight=1) #current scores
-        content.rowconfigure(1, weight=3) #game action
-        content.rowconfigure(2, weight=0) #countdown timer
+        content.rowconfigure(0, weight=4) #current scores
+        content.rowconfigure(1, weight=5) #game action
+        content.rowconfigure(2, weight=1) #countdown timer
         content.rowconfigure(3, weight=0) #menu
         content.columnconfigure(0, weight=1)
 
