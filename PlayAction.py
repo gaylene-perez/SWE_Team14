@@ -296,4 +296,3 @@ if __name__ == "__main__":
     screen.pack(fill="both", expand=True)
 
     root.mainloop()
-"""
