@@ -124,3 +124,24 @@ class PlayAction(BaseMenu):
         
         # pass
 
+if __name__ == "__main__":
+    root = tk.Tk()
+    root.title("PLAYER ACTION SCREEN")
+
+    #trying to match splash screen
+    width = 1000
+    height = 637
+
+    screen_width = root.winfo_screenwidth()
+    screen_height = root.winfo_screenheight()
+
+    x = int((screen_width / 2) - (width / 2))
+    y = int((screen_height / 2) - (height / 2))
+
+    root.geometry(f"{width}x{height}+{x}+{y}")
+
+    screen = PlayAction(root)
+    screen.pack(fill="both", expand=True)
+
+    root.mainloop()
+
