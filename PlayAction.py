@@ -265,7 +265,9 @@ class PlayAction(BaseMenu):
         current_action.grid(row=1, column=0, padx=20, pady=10, sticky="nsew")
 
         #--title--
-
+        current_action_title = tk.Label(current_action, text="Current Game Action", font=("Courier New", 20, "bold"), fg="white", bg="blue")
+        current_action_title.grid(row=1, column=0, padx=20, pady=10, sticky="nw")
+        
         #--log container--
 
         #--listbox--
