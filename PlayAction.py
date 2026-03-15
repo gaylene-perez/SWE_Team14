@@ -290,7 +290,7 @@ class PlayAction(BaseMenu):
         #--listbox--
         # self.action_listbox = tk.Listbox(log, bg="blue", fg="white", font="Courier New", 16, "bold"), relief="flat", borderwidth=0)
         # self.action_listbox.grid(row=0, column=0, sticky="nsew")
-        current_action_listbox = tk.Listbox(self, bg="blue", fg="white", font=("Courier New", 16, "bold"), relief="flat", borderWidth=0)
+        current_action_listbox = tk.Listbox(self, bg="blue", fg="white", font=("Courier New", 16, "bold"), relief="flat", borderwidth=0)
         current_action_listobox.grid(row=1, column=0, sticky="nsew")
         # pass
 
