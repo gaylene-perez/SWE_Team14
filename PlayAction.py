@@ -1,3 +1,4 @@
+"""
 import tkinter as tk
 from BaseMenu import BaseMenu
 
@@ -144,8 +145,8 @@ if __name__ == "__main__":
     screen.pack(fill="both", expand=True)
 
     root.mainloop()
-
 """
+
 import tkinter as tk
 from BaseMenu import BaseMenu
 
