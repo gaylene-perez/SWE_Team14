@@ -232,6 +232,8 @@ class PlayAction(BaseMenu):
         #--red team panel (left)--
         #frame
         #title
+        red_team_title = tk.Label(current_score, text="RED TEAM", font=("Courier New", 20, "bold"), fg="white", bg="black")
+        red_team_title.grid(row=1, column=0, padx=20, pady=10, sticky="nsew")
         #red_player = tk.Lable()
         #red_player.pack(anchor="w")
         #red_score = tk.Label()
