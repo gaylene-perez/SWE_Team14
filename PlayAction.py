@@ -175,7 +175,7 @@ class PlayAction(BaseMenu):
         content.grid(row=0, column=0, sticky="nsew")
 
         content.rowconfigure(0, weight=1) #current scores
-        content.rowconfigure(1, weight=1) #game action
+        content.rowconfigure(1, weight=2) #game action
         content.rowconfigure(2, weight=0) #countdown timer
         content.rowconfigure(3, weight=0) #menu
         content.columnconfigure(0, weight=1)
@@ -266,7 +266,7 @@ class PlayAction(BaseMenu):
 
         #--title--
         current_action_title = tk.Label(current_action, text="Current Game Action", font=("Courier New", 20, "bold"), fg="white", bg="blue")
-        current_action_title.grid(row=1, column=0, padx=20, pady=10, sticky="nw")
+        current_action_title.grid(row=1, column=0, padx=20, pady=10, sticky="ne")
         
         #--log container--
 
