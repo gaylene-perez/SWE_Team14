@@ -223,11 +223,11 @@ class PlayAction(BaseMenu):
 
         # title1 = Current Scores
         title1 = tk.Label(current_score, text="Current Scores", font=("Courier New", 20, "bold"), fg="green", bg="black")
-        title1.grid(row=0, column=1, padx=20, pady=10, sticky="e") # alligned right
+        title1.grid(row=0, column=1, padx=20, pady=10, sticky="ne") # alligned right
         
         # title2 = XP
         title2 = tk.Label(current_score, text="XP", font=("Courier New", 20, "bold"), fg="red", bg="black")
-        title2.grid(row=0, column=0, padx=20, pady=10, sticky="w") # alligned left
+        title2.grid(row=0, column=0, padx=20, pady=10, sticky="nw") # alligned left
 
         #--red team panel (left)--
         #frame
