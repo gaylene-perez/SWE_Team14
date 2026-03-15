@@ -126,7 +126,7 @@ class PlayAction(BaseMenu):
 
 if __name__ == "__main__":
     root = tk.Tk()
-    root.title("PLAYER ACTION SCREEN")
+    root.title("PLAY GAME")
 
     #trying to match splash screen
     width = 1000
