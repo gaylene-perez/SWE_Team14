@@ -9,7 +9,7 @@ class PlayAction(BaseMenu):
         self._style()
         self._ui()
 
-    def _style(self) ->None:
+    def _style(self) -> None:
         self.master.config(background="black")
         self.configure(background="black")
 
