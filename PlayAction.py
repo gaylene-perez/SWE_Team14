@@ -254,7 +254,7 @@ class PlayAction(BaseMenu):
         green_player.grid(row=2, column=1, padx=20, pady=10, sticky="w")
         #green_score = tk.Label()
         #green_score.pack(anchor="e")
-        green_score = tk.Label(current_score, text="0", font-("Courier New", 20, "bold"), fg="green", bg="black")
+        green_score = tk.Label(current_score, text="0", font=("Courier New", 20, "bold"), fg="green", bg="black")
         green_score.grid(row=2, column=1, padx=20, pady=10, sticky="e")
     
 
