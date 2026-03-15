@@ -269,7 +269,7 @@ class PlayAction(BaseMenu):
 
         #green_total = tk.Label()
         #green_total.grid()
-        green_total = tk.Label(current_score, text="0", font="Courier New", 20, "bold"), fg="green", bg="black")
+        green_total = tk.Label(current_score, text="0", font=("Courier New", 20, "bold"), fg="green", bg="black")
         green_total.grid(row=3, column=1, padx=20, pady=10, sticky="se")
         
         # pass
