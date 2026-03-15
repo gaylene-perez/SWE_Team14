@@ -37,7 +37,7 @@ class PlayAction(BaseMenu):
         #menu
         super()._ui(content)
 
-    def current_game_score(self, parent):
+    def _current_game_score(self, parent):
         #--top section holding both teams and score totals--
         #showing one example here so you have an idea on what this outline needs to be filled out with
         # score = tk.Frame(self, bg="black")
@@ -101,7 +101,7 @@ class PlayAction(BaseMenu):
         #green_total.grid()
         # pass
 
-    def game_action(self, parent):
+    def _game_action(self, parent):
         #similar to last function but now this parft is the section showing the live log
         #action = tk.Frame(self, bg="blue")
         #action.grid(row=1, column=0, sticky="nsew", padx=20, pady=10)
@@ -117,7 +117,7 @@ class PlayAction(BaseMenu):
         # self.action_listbox.grid(row=0, column=0, sticky="nsew")
         # pass
 
-    def countdown_timer(self, parent):
+    def _countdown_timer(self, parent):
 
         timer = tk.Frame(self, bg="black")
         timer.grid(row=2, column=0, padx=20, pady=10, sticky="nsew")
