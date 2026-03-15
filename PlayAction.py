@@ -243,7 +243,7 @@ class PlayAction(BaseMenu):
         #frame
         #title
         green_team_title = tk.Label(current_score, text="GREEN TEAM", font=("Courier New", 20, "bold"), fg="white", bg="black")
-        green_teamt_title.grid(row=1, column=1, padx=20, pady=10, sticky="n")
+        green_team_title.grid(row=1, column=1, padx=20, pady=10, sticky="n")
         #green_player = tk.Label()
         #green_player.pack(anchor="w")
         #green_score = tk.Label()
