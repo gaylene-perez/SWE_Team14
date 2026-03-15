@@ -237,11 +237,11 @@ class PlayAction(BaseMenu):
         #red_player = tk.Lable()
         #red_player.pack(anchor="w")
         red_player = tk.Label(current_score, text="Player Names", font=("Courier New", 20, "bold"), fg="red", bg="black")
-        red_player.grid(row=2, column=0, padx=20, pady=10, sticky="w")
+        red_player.grid(row=2, column=0, padx=20, pady=10, sticky="nw")
         #red_score = tk.Label()
         #red_score.pack(anchor="e")
         red_score = tk.Label(current_score, text="0", font=("Courier New", 20, "bold"), fg="red", bg="black")
-        red_score.grid(row=2, column=0, padx=20, pady=10, sticky="e")
+        red_score.grid(row=2, column=0, padx=20, pady=10, sticky="ne")
 
         #--green team panel (left)--
         #frame
@@ -251,11 +251,11 @@ class PlayAction(BaseMenu):
         #green_player = tk.Label()
         #green_player.pack(anchor="w")
         green_player = tk.Label(current_score, text="Player Names", font=("Courier New", 20, "bold"), fg="green", bg="black")
-        green_player.grid(row=2, column=1, padx=20, pady=10, sticky="w")
+        green_player.grid(row=2, column=1, padx=20, pady=10, sticky="nw")
         #green_score = tk.Label()
         #green_score.pack(anchor="e")
         green_score = tk.Label(current_score, text="0", font=("Courier New", 20, "bold"), fg="green", bg="black")
-        green_score.grid(row=2, column=1, padx=20, pady=10, sticky="e")
+        green_score.grid(row=2, column=1, padx=20, pady=10, sticky="ne")
     
 
         #--team totals--
