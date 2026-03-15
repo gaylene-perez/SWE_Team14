@@ -286,21 +286,23 @@ class PlayAction(tk.Frame):
 
         self.timer_label = tk.Label(
             timer,
-            text=self.format_time(self.time_left), 
+            text="Time Remaining:", 
             font=("Courier New", 20, "bold"),
             fg="yellow", 
             bg="black"
         )
-        self.timer_label.grid(row=0, column=1, padx=20, pady=10, sticky="w")
+        timer_title.grid(row=0, column=0, padx=20, pady=10, sticky="e")
 
-        #testing the timer: 
-        start_button = tk.Button(
-            timer,
-            text="Start Timer",
-            font=("Courier New", 12, "bold"),
-            command=self.start_timer
-        )
-        start_button.grid(row=1, column=0, columnspan=2, pady=5)
+        self.timer_label = tk.Label(
+        timer,
+        text=self.format_time(self.time_left),
+        font=("Courier New", 20, "bold"),
+        fg="yellow",
+        bg="black"
+    )
+    self.timer_label.grid(row=0, column=1, padx=20, pady=10, sticky="w")
+
+    self.start_timer()
 
     def format_time(self, seconds):
         minutes = seconds // 60
