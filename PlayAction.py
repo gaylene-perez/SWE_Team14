@@ -294,15 +294,15 @@ class PlayAction(tk.Frame):
         timer_title.grid(row=0, column=0, padx=20, pady=10, sticky="e")
 
         self.timer_label = tk.Label(
-        timer,
-        text=self.format_time(self.time_left),
-        font=("Courier New", 20, "bold"),
-        fg="yellow",
-        bg="black"
-    )
-    self.timer_label.grid(row=0, column=1, padx=20, pady=10, sticky="w")
+            timer,
+            text=self.format_time(self.time_left),
+            font=("Courier New", 20, "bold"),
+            fg="yellow",
+            bg="black"
+        )
+        self.timer_label.grid(row=0, column=1, padx=20, pady=10, sticky="w")
 
-    self.start_timer()
+        self.start_timer()
 
     def format_time(self, seconds):
         minutes = seconds // 60
