@@ -279,6 +279,9 @@ class PlayAction(BaseMenu):
 
         timer = tk.Frame(self, bg="black")
         timer.grid(row=2, column=0, padx=20, pady=10, sticky="nsew")
+
+        timer_title = tk.Label(self, text="Time Remaining:", font=("Courier New", 20, "bold"), fg="white", bg="black")
+        timer_title.grid(row=2, column = 0, padx=20, pady=10, sticky="e")
         
         # pass
 
