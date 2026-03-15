@@ -195,7 +195,7 @@ class PlayAction(BaseMenu):
         # score = tk.Frame(self, bg="black")
         # score.grid(row=0, column=0, sticky="nsew", padx=20, pady=10)
         
-        current_score = tk.Frame(self, bg="black")
+        current_score = tk.Frame(content, bg="black")
         current_score.grid(row=0, column=0, padx=20, pady=10, sticky="nsew")
 
         #--scoreboard rows/columns--
@@ -261,11 +261,11 @@ class PlayAction(BaseMenu):
         #similar to last function but now this parft is the section showing the live log
         #action = tk.Frame(self, bg="blue")
         #action.grid(row=1, column=0, sticky="nsew", padx=20, pady=10)
-        current_action = tk.Frame(self, bg="blue")
+        current_action = tk.Frame(content, bg="blue")
         current_action.grid(row=1, column=0, padx=20, pady=10, sticky="nsew")
 
         #--title--
-        current_action_title = tk.Label(self, text="Current Game Action", font=("Courier New", 20, "bold"), fg="white", bg="blue")
+        current_action_title = tk.Label(content, text="Current Game Action", font=("Courier New", 20, "bold"), fg="white", bg="blue")
         current_action_title.grid(row=1, column=0, padx=20, pady=10, sticky="ne")
         
         #--log container--
@@ -277,7 +277,7 @@ class PlayAction(BaseMenu):
 
     def countdown_timer(self, parent):
 
-        timer = tk.Frame(self, bg="black")
+        timer = tk.Frame(content, bg="black")
         timer.grid(row=2, column=0, padx=20, pady=10, sticky="nsew")
         
         # pass
