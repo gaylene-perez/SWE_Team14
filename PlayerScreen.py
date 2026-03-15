@@ -970,8 +970,8 @@ class PlayerScreen(BaseMenu):
 
     # def start_game(self, event=None):
     #     # messagebox.showinfo("Start Game", "Not wired yet.")
-    #     """Code up f5 key or equivalent to switch to play action display and start game (you can do this in
-    #     the original window or start another window)"""
+    #     Code up f5 key or equivalent to switch to play action display and start game (you can do this in
+    #     the original window or start another window)
     #     root = tk.Tk()
     #     root.title("PLAY GAME")
     #     root.geometry("900x500")
