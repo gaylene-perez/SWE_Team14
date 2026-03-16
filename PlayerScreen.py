@@ -693,7 +693,7 @@ class PlayerScreen(BaseMenu):
         #header
         tk.Label(body, text="CODENAME", font=("Courier New", 14, "bold"), fg=accent, bg=bg).grid(row=0, column=1, sticky="w", padx=10)
 
-        cell_style = {"bg": bg, "fg": "white", "font": ("Courier New", 12, "bold"), "relief": "groove", "bd": 2, "anchor": "w", "padx": 6}
+        # cell_style = {"bg": bg, "fg": "white", "font": ("Courier New", 12, "bold"), "relief": "groove", "bd": 2, "anchor": "w", "padx": 6}
 
         for i in range(1, MAX_PLAYERS + 1):
             index = tk.Label(body, text=str(i), font=("Courier New", 20, "bold"), fg="white", bg=bg)
@@ -833,6 +833,88 @@ class PlayerScreen(BaseMenu):
             return
         print(f"{player.codename} (ID: {player.player_id}, EQ: {player.equipment_id})")  #in terminal
 
+    def _equipment_popup(self, records) -> None: #enter all eq id when loading from db
+        popup = tk.Toplevel(self.master)
+        popup.title("Enter equipment IDs")
+        popup.configure(bg="black")
+        popup.resizable(width=False, height=False)
+        popup.transient(self.master)
+        popup.grab_set()
+
+        label_style = {"bg": "black", "fg": "white", "font": ("Courier New", 12, "bold")}
+        entry_style = {"bg": "black", "fg": "white", "font": ("Courier New", 12, "bold"), "insertbackground": "white"}
+
+        tk.Label(popup, text="PLAYER ID", **label_style).grid(row=0, column=0, padx=10, pady=10, sticky="w") #header
+        tk.Label(popup, text="CODENAME", **label_style).grid(row=0, column=1, padx=10, pady=10, sticky="w")
+        tk.Label(popup, text="EQUIPMENT ID", **label_style).grid(row=0, column=2, padx=10, pady=10, sticky="w")
+
+        equipment_vars = []
+
+        for i, (player_id, codename) in enumerate(records, start=1):
+            tk.Label(popup, text=str(player_id), **label_style).grid(row=i, column=0, padx=10, pady=5, sticky="w")
+            tk.Label(popup, text=codename, **label_style).grid(row=i, column=1, padx=10, pady=5, sticky="w")
+
+            equipment_var = tk.StringVar()
+            equipment_entry = tk.Entry(popup, textvariable=equipment_var, **entry_style)
+            equipment_entry.grid(row=i, column=2, padx=10, pady=5)
+
+            equipment_vars.append((player_id, codename, equipment_var))
+
+        tk.Button(
+            popup,
+            text="Continue",
+            command=lambda: self._finish_db_load(popup, equipment_vars),
+            font=("Courier New", 12, "bold")).grid(row=len(records) + 1, column=1, padx=10, pady=15, sticky="ew")
+        tk.Button(
+            popup,
+            text="Cancel",
+            command=popup.destroy,
+            font=("Courier New", 12, "bold")).grid(row=len(records) + 1, column=2, padx=10, pady=15, sticky="ew")
+
+    def _finish_db_load(self, popup, equipment_vars) -> None:
+        loaded_players = []
+        used_eid = set()
+
+        for player_id, codename, equipment_var in equipment_vars:
+            equipment_text = equipment_var.get().strip()
+            if not equipment_text: #empty check
+                messagebox.showerror("Error", f"Equipment ID required for {codename}!", parent=popup)
+                return
+
+            try:
+                equipment_id = int(equipment_text) #integer check
+            except ValueError:
+                messagebox.showerror("Error", f"Equipment ID for {codename} must be integer!", parent=popup)
+                return
+
+            if equipment_id in used_eid: #duplicate check
+                messagebox.showerror("Error", f"Duplicate equipment ID {equipment_id}", parent=popup)
+                return
+
+            used_eid.add(equipment_id)
+            loaded_players.append(PlayerEntry(player_id, codename, equipment_id))
+        self.reset_players()
+
+        for player in loaded_players:
+            red_team = (player.equipment_id % 2 == 1)
+            green_team = (player.equipment_id % 2 == 0)
+
+            if red_team:
+                if len(self.red_players) >= MAX_PLAYERS:
+                    messagebox.showerror("Error", "Unable to add. Red team full!", parent=popup)
+                    return
+                self.red_players.append(player)
+                self._add_to_team("red", player)
+            if green_team:
+                if len(self.green_players) >= MAX_PLAYERS:
+                    messagebox.showerror("Error", "Unable to add. Green team full!", parent=popup)
+                    return
+                self.green_players.append(player)
+                self._add_to_team("green", player)
+
+        popup.destroy()
+        messagebox.showinfo("Success", f"Successfully loaded {len(loaded_players)} players!", parent=self.master)
+
     # Add player to database and team
     def add_player(self, event=None):
         player_id_var = tk.StringVar()
@@ -892,10 +974,18 @@ class PlayerScreen(BaseMenu):
 
         tk.Button(popup, text="ADD", command=lambda: self._handle_new_player(popup, player_id_var, codename_var, equipment_id_var, player_id_entry, codename_entry)).grid(row=3, column=0, columnspan=2, pady=10)
 
-    def load_players_from_db(self):
+    def load_players_from_db(self, event=None):
         print("DEBUG: database.conn =", database.conn)
 
         if not database.conn:
+            messagebox.showerror("Database Error", "No database connection.", parent=self.master)
+            return
+
+        confirm = messagebox.askyesno(
+            "Load Players from Database",
+            "Loading from database will override any newly added players with the same player ID.\n Do you want to continue?",
+            parent=self.master)
+        if not confirm:
             return
 
         try:
@@ -905,19 +995,14 @@ class PlayerScreen(BaseMenu):
                 records = cursor.fetchall()
                 print("DEBUG: records =", records)
 
-            for player_id, codename, equipment_id in records:
-                player = PlayerEntry(player_id, codename, equipment_id)
+            if not records: #empty db
+                messagebox.showinfo("Loading Players...", "No players found.", parent=self.master)
+                return
 
-                # if equipment_id % 2 == 1:
-                if len(self.red_players) < MAX_PLAYERS:
-                    self.red_players.append(player)
-                    self._write_player_to_row("red", player)
-                # else:
-                elif len(self.green_players) < MAX_PLAYERS:
-                    self.green_players.append(player)
-                    self._write_player_to_row("green", player)
+            self._equipment_popup(records)
+
         except Exception as e:
-            print(f"Error loading players from database: {e}")
+            messagebox.showerror("Database Error",f"Error loading players from database: {e}", parent=self.master)
 
     def start_game(self, event=None):
         # messagebox.showinfo("Start Game", "Not wired yet.")
@@ -952,7 +1037,7 @@ class PlayerScreen(BaseMenu):
         self.codename_var.set("")
         self.equipment_id_var.set("")
 
-    def quit(selfself):
+    def quit(self):
         self.master.destroy()
 
     # def start_game(self, event=None):
