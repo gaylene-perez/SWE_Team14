@@ -6,6 +6,7 @@ from typing import List
 import database
 from database import insert_player, playerIdExist
 from BaseMenu import BaseMenu
+from PlayAction import PlayAction
 
 # PLAYER SCREEN
 # red team (odd eq id) / green team (even eq id)
@@ -497,10 +498,10 @@ class PlayerScreen(BaseMenu):
         play_window = tk.Toplevel(self.master)
         play_window.title("PLAY GAME")
         play_window.resizable(width=False, height=False)
-        # root = tk.Tk()
-        # root.title("PLAY GAME")
-        # root.geometry("900x500")
-        # root.mainloop()
+
+        screen = PlayAction (play_window, red_players=self.red_players, green_players=self.green_players)
+        screen.pack(fill="both", expand=True)
+
 
     # change IP address
     def switch_network(self, event=None):
