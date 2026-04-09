@@ -15,8 +15,8 @@ try :
   try:
       # cursor.execute("INSERT INTO players VALUES (2, 'ReaClark')")
       # cursor.execute("INSERT INTO players VALUES (3, 'IndJones')")
-      cursor.execute("INSERT INTO players (player_id, codename) ", "SELECT %s, %s WHERE NOT EXISTS" , "SELECT 1 FROM players where player_id = %s", (2, 'ReaClark', 2) )
-      cursor.execute("INSERT INTO players (player_id, codename) ", "SELECT %s, %s WHERE NOT EXISTS" , "SELECT 1 FROM players where player_id = %s", (3, 'IndJones', 3) )
+      cursor.execute("INSERT INTO players (id, codename) SELECT %s, %s WHERE NOT EXISTS (SELECT 1 FROM players where id = %s)", (2, 'ReaClark', 2))
+      cursor.execute("INSERT INTO players (id, codename) SELECT %s, %s WHERE NOT EXISTS (SELECT 1 FROM players where id = %s)", (3, 'IndJones', 3))
       conn.commit() #save
   except Exception as e:
         print(f"Startup insertion warning: {e}")
@@ -43,7 +43,7 @@ def playerIdExist(player_id):
         return None
     try:
         with conn.cursor() as cursor:
-            cursor.execute("SELECT codename FROM players WHERE player_id = %s", (player_id,))
+            cursor.execute("SELECT codename FROM players WHERE id = %s", (player_id,))
             result = cursor.fetchone()
             return result[0] if result else None
     except Exception as e:
@@ -56,7 +56,7 @@ def insert_player(player_id, codename):
     try:
         with conn.cursor() as cursor:
             cursor.execute(
-                "INSERT INTO players (player_id, codename) VALUES (%s, %s)",
+                "INSERT INTO players (id, codename) VALUES (%s, %s)",
                 (player_id, codename)
             )
             conn.commit()
@@ -64,6 +64,7 @@ def insert_player(player_id, codename):
             return True #success!
     except Exception as e:
         print(f"Error inserting player: {e}")
+        conn.rollback()
         return False #again, explicit result
 
 
