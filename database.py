@@ -64,7 +64,7 @@ def insert_player(player_id, codename):
             return True #success!
     except Exception as e:
         print(f"Error inserting player: {e}")
-        conn.rollback() 
+        conn.rollback()
         return False #again, explicit result
 
 

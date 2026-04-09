@@ -149,6 +149,7 @@ if __name__ == "__main__":
 
 
 import tkinter as tk
+from tkinter import PhotoImage
 from BaseMenu import BaseMenu
 
 class PlayAction(tk.Frame):
@@ -164,6 +165,12 @@ class PlayAction(tk.Frame):
         self.time_left = 30
         self.timer_running = False
         self.timer_label = None
+
+        #base icon
+        self.base = PhotoImage(file="baseicon.png")
+        self.red_player_widget = []
+        self.green_player_widget = []
+        
 
         self._style()
         self._ui()
@@ -223,16 +230,42 @@ class PlayAction(tk.Frame):
         red_team_title = tk.Label(current_score, text="RED TEAM", font=("Courier New", 20, "bold"), fg="white", bg="black")
         red_team_title.grid(row=1, column=0, padx=20, pady=10, sticky="n")
 
-        red_names = [p.codename for p in self.red_players] if self.red_players else ["Player Names"]
-        red_player = tk.Label(
-            current_score,
-            text="\n".join(red_names),
-            font=("Courier New", 20, "bold"),
-            fg="red",
-            bg="black",
-            justify="left"
-        )
-        red_player.grid(row=2, column=0, padx=20, pady=10, sticky="nw")
+        self.red_player_frame = tk.Frame(current_score, bg="black")
+        self.red_player_frame.grid(row=2, column=0, padx=20, pady=10, sticky="nw")
+
+        self.red_player_widget = []
+
+        # red_names = [p.codename for p in self.red_players] if self.red_players else ["Player Names"]
+        if self.red_players:
+            for player in self.red_players:
+                row = tk.Frame(self.red_player_frame, bg="black")
+                row.pack(anchor="w")
+
+                icon = tk.Label(row, bg="black")
+                icon.pack(side="left", padx=(0,5))
+
+                red_player = tk.Label(
+                    # current_score,
+                    # text="\n".join(red_names),
+                    row,
+                    text=player.codename,
+                    font=("Courier New", 20, "bold"),
+                    fg="red",
+                    bg="black",
+                    justify="left"
+                )
+                red_player.pack(side="left")
+                self.red_player_widget.append((player, icon))
+        else:
+            red_player = tk.Label(
+                self.red_player_frame,
+                text="Player Names",
+                font=("Courier New", 20, "bold"),
+                fg="red",
+                bg="black",
+                justify="left")
+            red_player.pack(anchor="w")
+            # red_player_frame.grid(row=2, column=0, padx=20, pady=10, sticky="nw")
 
         red_score_frame = tk.Frame(current_score, bg="black")
         red_score_frame.grid(row=2, column=0, sticky="ne", padx=20, pady=10)
@@ -242,16 +275,43 @@ class PlayAction(tk.Frame):
         green_team_title = tk.Label(current_score, text="GREEN TEAM", font=("Courier New", 20, "bold"), fg="white", bg="black")
         green_team_title.grid(row=1, column=1, padx=20, pady=10, sticky="n")
 
-        green_names = [p.codename for p in self.green_players] if self.green_players else ["Player Names"]
-        green_player = tk.Label(
-            current_score,
-            text="\n".join(green_names),
-            font=("Courier New", 20, "bold"),
-            fg="green",
-            bg="black",
-            justify="left"
-        )
-        green_player.grid(row=2, column=1, padx=20, pady=10, sticky="nw")
+        self.green_player_frame = tk.Frame(current_score, bg="black")
+        self.green_player_frame.grid(row=2, column=1, padx=20, pady=10, sticky="nw")
+
+        self.green_player_widget = []
+
+        # green_names = [p.codename for p in self.green_players] if self.green_players else ["Player Names"]
+        if self.green_players:
+            for player in self.green_players:
+                row = tk.Frame(self.green_player_frame, bg="black")
+                row.pack(anchor="w")
+
+                icon = tk.Label(row, bg="black")
+                icon.pack(side="left", padx=(0,5))
+
+                green_player = tk.Label(
+                    # current_score,
+                    # text="\n".join(green_names),
+                    row,
+                    text=player.codename,
+                    font=("Courier New", 20, "bold"),
+                    fg="green",
+                    bg="black",
+                    justify="left"
+                )
+                green_player.pack(side="left")
+                self.green_player_widget.append((player, icon))
+        else:
+            green_player = tk.Label(
+                self.green_player_frame,
+                text="Player Names",
+                font=("Courier New", 20, "bold"),
+                fg="green",
+                bg="black",
+                justify="left"
+            )
+            green_player.pack(anchor="w")
+            # green_player.grid(row=2, column=1, padx=20, pady=10, sticky="nw")
 
         green_score_frame = tk.Frame(current_score, bg="black")
         green_score_frame.grid(row=2, column=1, sticky="ne", padx=20, pady=10)
@@ -263,6 +323,19 @@ class PlayAction(tk.Frame):
 
         green_total = tk.Label(current_score, text="0", font=("Courier New", 20, "bold"), fg="green", bg="black")
         green_total.grid(row=3, column=1, padx=20, pady=10, sticky="se")
+
+    #base icon
+    def base_scored(self, equipment_id):
+        for player, icon in self.red_player_widget:
+            if player.equipment_id == equipment_id:
+                icon.config(image=self.base)
+                icon.image = self.base
+                return
+        for player, icon in self.green_player_widget:
+            if player.equipment_id == equipment_id:
+                icon.config(image=self.base)
+                icon.image = self.base
+                return
 
     def game_action(self, parent):
         current_action = tk.Frame(parent, bg="blue")
