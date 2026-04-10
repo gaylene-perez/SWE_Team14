@@ -93,19 +93,6 @@ class PlayerScreen(BaseMenu):
 
         super()._ui(content) #base menu
 
-        # # menu
-        # menu = tk.Frame(content, bg="black")
-        # menu.grid(row=2, column=0, sticky="ew", padx=16, pady=(0, 12))
-        # for i in range(6):
-        #     menu.columnconfigure(i, weight=1)
-        # self._menu(menu, 0, "F1\nAdd\nPlayer", self.add_player)
-        # self._menu(menu, 1, "F2\nLoad\nPlayers", self.load_players_from_db)
-        # self._menu(menu, 2, "F5\nStart\nGame", self.start_game)
-        # self._menu(menu, 3, "F10\nSwitch\nNetwork", self.switch_network)
-        # self._menu(menu, 4, "F12\nClear\nPlayers", self.reset_players)
-        # self._menu(menu, 5, "ESC\nExit", self.quit)
-        # button = tk.Button(self, text="CLICK TO SWITCH NETWORKS", command=self.switch_network, fg="blue", bg="light gray", height=2, width=25)
-
     def _make_scroll(self, parent, bg: str):
         canvas = tk.Canvas(parent, bg=bg, highlightthickness=0)
         vbar = tk.Scrollbar(parent, orient="vertical", command=canvas.yview, width=5)
@@ -144,10 +131,6 @@ class PlayerScreen(BaseMenu):
 
         return canvas, inner
 
-    # def _menu(self, parent, col: int, text: str, cmd) -> None:
-    #     bn = tk.Button(parent, text=text, command=cmd, fg="blue", bg="#8a8a8a", activebackground="#9a9a9a", relief="ridge", bd=2, font=("Courier New", 10, "bold"), height=3)
-    #     bn.grid(row=0, column=col, padx=6, pady=8, sticky="ew")
-
     def _team_panel(self, parent, title:str, bg="black", accent="white") -> tk.Frame:
         panel = tk.Frame(parent, bg=bg, bd=2, relief="groove")
         panel.rowconfigure(1, weight=1)
@@ -180,8 +163,6 @@ class PlayerScreen(BaseMenu):
         #header
         tk.Label(body, text="CODENAME", font=("Courier New", 14, "bold"), fg=accent, bg=bg).grid(row=0, column=1, sticky="w", padx=10)
 
-        # cell_style = {"bg": bg, "fg": "white", "font": ("Courier New", 12, "bold"), "relief": "groove", "bd": 2, "anchor": "w", "padx": 6}
-
         for i in range(1, MAX_PLAYERS + 1):
             index = tk.Label(body, text=str(i), font=("Courier New", 20, "bold"), fg="white", bg=bg)
             index.grid(row=i, column=0, padx=10, pady=10, sticky="w")
@@ -195,14 +176,6 @@ class PlayerScreen(BaseMenu):
             self.red_rows = rows
         else:
             self.green_rows = rows
-
-    # def _key_input(self, event=None):
-    #     self.master.bind("<F1>", self.add_player)
-    #     self.master.bind("<F2>", self.load_players_from_db)
-    #     self.master.bind("<F5>", lambda e: self.start_game())
-    #     self.master.bind("<F10>", self.switch_network)
-    #     self.master.bind("<F12>", self.reset_players)
-    #     self.master.bind("<Escape>", lambda e: self.quit())
 
     def _write_player_to_row(self, team:str, player:PlayerEntry) -> None:
         rows = self.red_rows if team == "red" else self.green_rows
@@ -526,41 +499,6 @@ class PlayerScreen(BaseMenu):
 
     def quit(self):
         self.master.destroy()
-
-    # def start_game(self, event=None):
-    #     # messagebox.showinfo("Start Game", "Not wired yet.")
-    #     """Code up f5 key or equivalent to switch to play action display and start game (you can do this in
-    #     the original window or start another window)"""
-    #     root = tk.Tk()
-    #     root.title("PLAY GAME")
-    #     root.geometry("900x500")
-    #
-    #     # Player Action Screen
-    #     root.rowconfigure(0, weight=1)
-    #     root.columnconfigure(0, weight=1)
-    #
-    #     action_content = tk.Frame(root, bg="black")
-    #     action_content.grid(row=0, column=0, sticky="nsew")
-    #
-    #     action_content.rowconfigure(0, weight=1) #score
-    #     action_content.rowconfigure(1, weight=1) #action
-    #     action_content.rowconfigure(2, weight=0) #Time remaining
-    #     action_content.columnconfigure(0, weight=1)
-    #
-    #     #score
-    #     score = tk.Frame(action_content, bg="black")
-    #     score.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
-    #
-    #     #action
-    #     action = tk.Frame(action_content, bg="blue")
-    #     score.grid(row=1, column=0, padx=10, pady=10, sticky="nsew")
-    #
-    #     #Time remianing
-    #     timer = tk.Frame(action_content, bg="black")
-    #     timer.grid(row=2, column=0, padx=10, pady=10, sticky="nsew")
-    #
-    #     root.mainloop()
-
 
 if __name__ == "__main__":
     root = tk.Tk()
