@@ -22,7 +22,7 @@ try :
         print(f"Startup insertion warning: {e}")
         conn.rollback() #clean slate
 
-  cursor.execute("SELECT * FROM players")
+  cursor.execute("SELECT * FROM players ORDER BY id")
   records = cursor.fetchall()
   for row in records:
     print(row)
