@@ -206,7 +206,7 @@ class PlayerScreen(BaseMenu):
         popup.after(1, refocus_player_id)
 
     #new player helper
-    def _handle_new_player(self, popup, player_id_var, codename_var, equipment_id_var, player_id_entry, codename_entry):
+    def _handle_new_player(self, popup, player_id_var, codename_var, equipment_id_var, player_id_entry, codename_entry, equipment_entry):
         player_id = player_id_var.get().strip()
         codename = codename_var.get().strip()
         equipment_id = equipment_id_var.get().strip()
@@ -240,7 +240,9 @@ class PlayerScreen(BaseMenu):
         existing_codename = playerIdExist(player_id_int)
         if existing_codename:
             codename = existing_codename
-            messagebox.showinfo("Player Found", f"Codename: {codename}", parent=popup)
+            # messagebox.showinfo("Player Found", f"Codename: {codename}", parent=popup)
+            codename_var.set(codename)
+            # equipment_entry.focus()
         else:
             if not codename:
                 messagebox.showerror("Error", "Codename is required for new player!", parent=popup)
@@ -255,7 +257,7 @@ class PlayerScreen(BaseMenu):
                 popup.after(1, refocus_codename)
                 return
 
-            insert_player(player_id_int, codename)
+            insert_player(player_id_int, codename)##
 
         player = PlayerEntry(player_id_int, codename, equipment_id_int)
         red_team = (player.equipment_id % 2 == 1)
@@ -309,6 +311,7 @@ class PlayerScreen(BaseMenu):
         tk.Label(popup, text="EQUIPMENT ID", **label_style).grid(row=0, column=2, padx=10, pady=10, sticky="w")
 
         equipment_vars = []
+        popup.equipment_vars = equipment_vars
 
         for i, (player_id, codename) in enumerate(records, start=1):
             tk.Label(popup, text=str(player_id), **label_style).grid(row=i, column=0, padx=10, pady=5, sticky="w")
@@ -318,7 +321,10 @@ class PlayerScreen(BaseMenu):
             equipment_entry = tk.Entry(popup, textvariable=equipment_var, **entry_style)
             equipment_entry.grid(row=i, column=2, padx=10, pady=5)
 
-            equipment_vars.append((player_id, codename, equipment_var))
+            delete_btn = tk.Button(popup, text="x", command=lambda pid=player_id, r=i:self._delete_and_remove(popup,pid, r), font=("Courier New", 12, "bold"), bg="black", fg="red")
+            delete_btn.grid(row=i, column=3, padx=5)
+
+            equipment_vars.append({"player_id": player_id, "codename": codename, "equipment_var": equipment_var, "row": i, "deleted": False})
 
         tk.Button(
             popup,
@@ -331,15 +337,42 @@ class PlayerScreen(BaseMenu):
             command=popup.destroy,
             font=("Courier New", 12, "bold")).grid(row=len(records) + 1, column=2, padx=10, pady=15, sticky="ew")
 
+    def _delete_popup_row(self, popup, row):
+        for widget in popup.grid_slaves(row=row):
+            widget.destroy()
+
+    def _delete_player_db(self, player_id):
+        with database.conn.cursor() as cursor:
+            cursor.execute("DELETE FROM players WHERE id = %s", (player_id,))
+            database.conn.commit()
+
+    def _delete_and_remove(self, popup, player_id, row):
+        self._delete_player_db(player_id)
+        for widget in popup.grid_slaves(row=row):
+            widget.destroy()
+
+        for item in popup.equipment_vars:
+            if item["player_id"] == player_id:
+                item["deleted"] = True
+
     def _finish_db_load(self, popup, equipment_vars) -> None:
         loaded_players = []
         used_eid = set()
+        skipped_players = [] #blank eid
 
-        for player_id, codename, equipment_var in equipment_vars:
+        for item in equipment_vars:
+            if item["deleted"]:
+                continue
+
+            player_id = item["player_id"]
+            codename = item["codename"]
+            equipment_var = item["equipment_var"]
+
             equipment_text = equipment_var.get().strip()
-            if not equipment_text: #empty check
-                messagebox.showerror("Error", f"Equipment ID required for {codename}!", parent=popup)
-                return
+
+            if not equipment_text:
+                skipped_players.append(codename)
+                continue
 
             try:
                 equipment_id = int(equipment_text) #integer check
@@ -353,6 +386,18 @@ class PlayerScreen(BaseMenu):
 
             used_eid.add(equipment_id)
             loaded_players.append(PlayerEntry(player_id, codename, equipment_id))
+
+        if skipped_players:
+            confirm = messagebox.askyesno(
+                "Missing Equipment IDs,",
+                "Some players do not have an equipment ID entered.\n"
+                "Only players with an equipment ID will be loaded.\n\n"
+                "Do you want to continue?",
+                parent=popup
+            )
+            if not confirm:
+                return
+
         self.reset_players()
 
         for player in loaded_players:
@@ -429,10 +474,11 @@ class PlayerScreen(BaseMenu):
                 codename_entry.focus()
 
         player_id_entry.bind("<Return>", lambda e: check_player_id())
+        player_id_entry.bind("<FocusOut>", lambda e: check_player_id()) #leaving check
         codename_entry.bind("<Return>", lambda e: self.equipment_entry.focus())
-        self.equipment_entry.bind("<Return>", lambda e: self._handle_new_player(popup, player_id_var, codename_var, equipment_id_var, player_id_entry, codename_entry))
+        self.equipment_entry.bind("<Return>", lambda e: self._handle_new_player(popup, player_id_var, codename_var, equipment_id_var, player_id_entry, codename_entry, self.equipment_entry))
 
-        tk.Button(popup, text="ADD", command=lambda: self._handle_new_player(popup, player_id_var, codename_var, equipment_id_var, player_id_entry, codename_entry)).grid(row=3, column=0, columnspan=2, pady=10)
+        tk.Button(popup, text="ADD", command=lambda: self._handle_new_player(popup, player_id_var, codename_var, equipment_id_var, player_id_entry, codename_entry, self.equipment_entry)).grid(row=3, column=0, columnspan=2, pady=10)
 
     def load_players_from_db(self, event=None):
         print("DEBUG: database.conn =", database.conn)
@@ -443,7 +489,7 @@ class PlayerScreen(BaseMenu):
 
         confirm = messagebox.askyesno(
             "Load Players from Database",
-            "Loading from database will override any newly added players with the same player ID.\n Do you want to continue?",
+            "Loading from database will override any newly added players with the same player ID.\n\n Do you want to continue?",
             parent=self.master)
         if not confirm:
             return
