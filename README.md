@@ -39,6 +39,9 @@ verify installation:
        Exit PostgreSQL:
           \q
 
+   (5) Enable music
+       Install playsound3 using pip install playsound3
+
 Running the Program:
   python3 Main.py
 
