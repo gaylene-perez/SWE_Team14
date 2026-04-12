@@ -151,11 +151,15 @@ if __name__ == "__main__":
 import tkinter as tk
 from tkinter import PhotoImage
 from BaseMenu import BaseMenu
+from Music import PlayMusic
 
 class PlayAction(tk.Frame):
     def __init__(self, master, red_players=None, green_players=None):
         super().__init__(master)
         self.master = master
+
+        self.music = PlayMusic()
+        slef.music.play()
 
         # store PlayerEntry objects
         self.red_players = red_players if red_players else []
