@@ -159,7 +159,7 @@ class PlayAction(tk.Frame):
         self.master = master
 
         self.music = PlayMusic()
-        slef.music.play()
+        self.music.play()
 
         # store PlayerEntry objects
         self.red_players = red_players if red_players else []
@@ -167,6 +167,9 @@ class PlayAction(tk.Frame):
 
         #count down timer code: 
         self.time_left = 30
+        self.game_time_left = 6 * 60
+        self.start_countdown = 30
+        self.timer_mode = "start"
         self.timer_running = False
         self.timer_label = None
 
@@ -372,7 +375,7 @@ class PlayAction(tk.Frame):
 
         self.timer_label = tk.Label(
             timer,
-            text=self.format_time(self.time_left),
+            text=self.format_time(self.start_countdown),
             font=("Courier New", 20, "bold"),
             fg="yellow",
             bg="black"
@@ -392,15 +395,34 @@ class PlayAction(tk.Frame):
             self.update_timer()
 
     def update_timer(self):
-        if self.timer_running:
-            self.timer_label.config(text=self.format_time(self.time_left))
+        if not self.timer_running:
+            return
+            #self.timer_label.config(text=self.format_time(self.time_left))
 
-            if self.time_left == 0:
-                self.timer_label.config(text="GO!")
-                self.timer_running = False
-            else:
-                self.time_left -= 1
+        if self.timer_mode == "start":
+            self.timer_label.config(text=self.format_time(self.start_countdown))
+
+            if self.start_countdown > 0:
+                self.start_countdown -= 1
                 self.after(1000, self.update_timer)
+            else: 
+                self.timer_mode = "game"
+                self.timer_label.config(text="GO!")
+                self.after(1000, self.update_timer)
+
+        # 6 minute gameplay timer code: 
+        elif self.timer_mode == "game":
+            self.timer_label.config(text=self.format_time(self.game_time_left))
+
+            if self.game_time_left > 0:
+                self.game_time_left -= 1
+                self.after(1000, self.update_timer)
+            else: 
+                self.timer_mode = "done"
+                self.timer_running = False
+                self.timer_label.config(text="GAME OVER")
+
+            
 
 
 if __name__ == "__main__":
