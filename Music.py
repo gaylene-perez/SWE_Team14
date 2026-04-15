@@ -1,4 +1,4 @@
-from playsound3 import playsound
+from pygame import mixer
 import random
 
 class PlayMusic():
@@ -10,4 +10,6 @@ class PlayMusic():
     
     def play(self):
 
-        playsound(self.file_path, block=False)
+        mixer.init()
+        mixer.music.load(self.file_path)
+        mixer.music.play()
