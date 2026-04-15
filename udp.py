@@ -1,4 +1,4 @@
- import socket
+import socket
 
 localIP     = "0.0.0.0"
 localPort   = 7501
