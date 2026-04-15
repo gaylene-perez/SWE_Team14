@@ -237,6 +237,17 @@ class PlayerScreen(BaseMenu):
             self._handle_duplicate(player_id_int, popup, player_id_entry)
             return
 
+        #no duplicate equipment id
+        if self._existing_equipment(equipment_id_int):
+            messagebox.showerror("Error", f"Equipment ID {equipment_id_int} is already used!", parent=popup)
+            def refocus_equipment():
+                popup.lift()
+                popup.focus_force()
+                equipment_entry.focus_force()
+                equipment_entry.selection_range(0, tk.END)
+            popup.after(1, refocus_equipment)
+            return
+
         existing_codename = playerIdExist(player_id_int)
         if existing_codename:
             codename = existing_codename
@@ -295,6 +306,12 @@ class PlayerScreen(BaseMenu):
             return
         print(f"{player.codename} (ID: {player.player_id}, EQ: {player.equipment_id})")  #in terminal
 
+    def _existing_equipment(self, equipment_id):
+        for player in self.red_players + self.green_players:
+            if player.equipment_id == equipment_id:
+                return True
+        return False
+
     def _equipment_popup(self, records) -> None: #enter all eq id when loading from db
         popup = tk.Toplevel(self.master)
         popup.title("Enter equipment IDs")
@@ -343,8 +360,27 @@ class PlayerScreen(BaseMenu):
 
     def _delete_player_db(self, player_id):
         with database.conn.cursor() as cursor:
+            cursor.execute("SELECT codename FROM players WHERE id = %s", (player_id,))
+            result = cursor.fetchone()
+
+            codename = result[0] if result else "UNKNOWN"
             cursor.execute("DELETE FROM players WHERE id = %s", (player_id,))
             database.conn.commit()
+            print(f"DEBUG: Deleted ({player_id}, '{codename}') from database")
+
+        self.red_players = [p for p in self.red_players if p.player_id != player_id]
+        self.green_players = [p for p in self.green_players if p.player_id != player_id]
+
+        # for r in self.red_rows:
+        #     r["codename"].config(text="")
+        # for r in self.green_rows:
+        #     r["codename"].config(text="")
+        #
+        # for p in self.red_players:
+        #     self._add_to_team("red", p)
+        # for p in self.green_players:
+        #     self._add_to_team("green", p)
+        self._refresh()
 
     def _delete_and_remove(self, popup, player_id, row):
         self._delete_player_db(player_id)
@@ -383,6 +419,10 @@ class PlayerScreen(BaseMenu):
             if equipment_id in used_eid: #duplicate check
                 messagebox.showerror("Error", f"Duplicate equipment ID {equipment_id}", parent=popup)
                 return
+            for active_player in self.red_players + self.green_players:
+                if active_player.player_id != player_id and active_player.equipment_id == equipment_id:
+                    messagebox.showerror("Error", f"Equipment ID {equipment_id} already exists!", parent=popup)
+                    return
 
             used_eid.add(equipment_id)
             loaded_players.append(PlayerEntry(player_id, codename, equipment_id))
@@ -398,27 +438,46 @@ class PlayerScreen(BaseMenu):
             if not confirm:
                 return
 
-        self.reset_players()
+        if not loaded_players:
+            popup.destroy()
+            messagebox.showinfo("No Players Loaded", "No players had an equipment ID. Current player lists unchanged.", parent=self.master)
+            return
+        # self.reset_players()
+        loaded_ids = {player.player_id for player in loaded_players}
+        self.red_players = [p for p in self.red_players if p.player_id not in loaded_ids]
+        self.green_players = [p for p in self.green_players if p.player_id not in loaded_ids]
 
         for player in loaded_players:
-            red_team = (player.equipment_id % 2 == 1)
-            green_team = (player.equipment_id % 2 == 0)
-
-            if red_team:
+            if player.equipment_id % 2 ==1:
                 if len(self.red_players) >= MAX_PLAYERS:
                     messagebox.showerror("Error", "Unable to add. Red team full!", parent=popup)
                     return
                 self.red_players.append(player)
-                self._add_to_team("red", player)
-            if green_team:
+            else:
                 if len(self.green_players) >= MAX_PLAYERS:
                     messagebox.showerror("Error", "Unable to add. Green team full!", parent=popup)
                     return
                 self.green_players.append(player)
-                self._add_to_team("green", player)
+
+        self._refresh()
 
         popup.destroy()
         messagebox.showinfo("Success", f"Successfully loaded {len(loaded_players)} players!", parent=self.master)
+
+    def _refresh(self):
+        for r in self.red_rows:
+            r["codename"].config(text="")
+        for r in self.green_rows:
+            r["codename"].config(text="")
+
+        for i, p in enumerate(self.red_players):
+            if i < len(self.red_rows):
+                self.red_rows[i]["codename"].config(text=p.codename)
+                print(f"{p.codename} (ID: {p.player_id}, EQ: {p.equipment_id})")
+        for i, p in enumerate(self.green_players):
+            if i < len(self.green_rows):
+                self.green_rows[i]["codename"].config(text=p.codename)
+                print(f"{p.codename} (ID: {p.player_id}, EQ: {p.equipment_id})")
 
     # Add player to database and team
     def add_player(self, event=None):
@@ -497,7 +556,7 @@ class PlayerScreen(BaseMenu):
         try:
             print("DEBUG: Loading players from DB...")
             with database.conn.cursor() as cursor:
-                cursor.execute("SELECT * FROM players")
+                cursor.execute("SELECT * FROM players ORDER BY id")
                 records = cursor.fetchall()
                 print("DEBUG: records =", records)
 
