@@ -183,7 +183,7 @@ class PlayAction(tk.Frame):
                 score_label = tk.Label(row, textvariable=score_var, font=("Courier New", 16, "bold"), fg="white", bg="black")
                 score_label.pack(side="right")
                 self.green_player_widget.append((player, icon, score_var))
-        else:
+	    else:
             green_player = tk.Label(
                 self.green_player_frame,
                 text="Player Names",
