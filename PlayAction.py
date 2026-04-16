@@ -1,154 +1,6 @@
-"""
 import tkinter as tk
-from BaseMenu import BaseMenu
-
-class PlayAction(BaseMenu):
-    def __init__(self, master):
-        super().__init__(master)
-        self.master = master
-
-        self._style()
-        self._ui()
-
-    def _style(self) -> None:
-        self.master.config(background="black")
-        self.configure(background="black")
-
-    def _ui(self) -> None:
-        self.rowconfigure(0, weight=1)
-        self.columnconfigure(0, weight=1)
-        self.master.rowconfigure(0, weight=1)
-        self.master.columnconfigure(0, weight=1)
-
-        content = tk.Frame(self, bg="black")
-        content.grid(row=0, column=0, sticky="nsew")
-
-        content.rowconfigure(0, weight=3) #current scores
-        content.rowconfigure(1, weight=2) #game action
-        content.rowconfigure(2, weight=0) #countdown timer
-        content.rowconfigure(3, weight=0) #menu
-        content.columnconfigure(0, weight=1)
-
-        #current scores
-        self.current_game_score(content)
-        #game action
-        self.game_action(content)
-        #countdown timer
-        self.countdown_timer(content)
-        #menu
-        super()._ui(content)
-
-    def _current_game_score(self, parent):
-        #--top section holding both teams and score totals--
-        #showing one example here so you have an idea on what this outline needs to be filled out with
-        # score = tk.Frame(self, bg="black")
-        # score.grid(row=0, column=0, sticky="nsew", padx=20, pady=10)
-        
-        current_score = tk.Frame(self, bg="black")
-        current_score.grid(row=0, column=0, padx=20, pady=10, sticky="nsew")
-
-        #--scoreboard rows/columns--
-        #here needing score.rowconfigure(x, weight=y) or score.columnconfigure(m, weight=n)
-        
-        #title row
-        current_score.rowcongigure(0, weight=0)
-        
-        #team row
-        current_score.rowconfigure(1, weight=1)
-        
-        #score row
-        current_score.rowconfigure(2, weight=2)
-        
-        #red column
-        current_score.columnconfigure(0, weight=1)
-        
-        #green column
-        current_score.columnconfigure(1, weight=1)
-
-        #--title: CURRENT SCORES--
-        #fg means foreground, bg means background
-        #title label (score, text=, font=("Courier New", size, "bold"), fg=, bg=)
-        #add label to grid, so title.grid()
-
-        # title1 = Current Scores
-        title1 = tk.Label(current_score, text="Current Scores", font=("Courier New", 20, "bold"), fg="green", bg="black")
-        title1.grid(row=0, column=1, padx=20, pady=10, sticky="e") # alligned right
-        
-        # title2 = XP
-        title2 = tk.Label(current_score, text="XP", font=("Courier New", 20, "bold"), fg="red", bg="black")
-        title2.grid(row=0, column=0, padx=20, pady=10, sticky="w") # alligned left
-
-        #--red team panel (left)--
-        #frame
-        #title
-        #red_player = tk.Lable()
-        #red_player.pack(anchor="w")
-        #red_score = tk.Label()
-        #red_score.pack(anchor="e")
-
-        #--green team panel (left)--
-        #frame
-        #title
-        #green_player = tk.Label()
-        #green_player.pack(anchor="w")
-        #green_score = tk.Label()
-        #green_score.pack(anchor="e")
-
-        #--team totals--
-        #red_total = tk.Label()
-        #red_total.grid()
-
-        #green_total = tk.Label()
-        #green_total.grid()
-        # pass
-
-    def _game_action(self, parent):
-        #similar to last function but now this parft is the section showing the live log
-        #action = tk.Frame(self, bg="blue")
-        #action.grid(row=1, column=0, sticky="nsew", padx=20, pady=10)
-        current_action = tk.Frame(self, bg="blue")
-        current_action.grid(row=1, column=0, padx=20, pady=10, sticky="nsew")
-
-        #--title--
-
-        #--log container--
-
-        #--listbox--
-        # self.action_listbox = tk.Listbox(log, bg="blue", fg="white", font="Courier New", 16, "bold"), relief="flat", borderwidth=0)
-        # self.action_listbox.grid(row=0, column=0, sticky="nsew")
-        # pass
-
-    def _countdown_timer(self, parent):
-
-        timer = tk.Frame(self, bg="black")
-        timer.grid(row=2, column=0, padx=20, pady=10, sticky="nsew")
-        
-        # pass
-
-if __name__ == "__main__":
-    root = tk.Tk()
-    root.title("PLAY GAME")
-
-    #trying to match splash screen
-    width = 1000
-    height = 637
-
-    screen_width = root.winfo_screenwidth()
-    screen_height = root.winfo_screenheight()
-
-    x = int((screen_width / 2) - (width / 2))
-    y = int((screen_height / 2) - (height / 2))
-
-    root.geometry(f"{width}x{height}+{x}+{y}")
-
-    screen = PlayAction(root)
-    screen.pack(fill="both", expand=True)
-
-    root.mainloop()
-"""
-
-
-import tkinter as tk
+import socket
+import queue
 from tkinter import PhotoImage
 from BaseMenu import BaseMenu
 from Music import PlayMusic
@@ -173,13 +25,28 @@ class PlayAction(tk.Frame):
         self.timer_running = False
         self.timer_label = None
 
+        #upd setup
+        self.localIP = "0.0.0.0"
+        self.localPort = 7501
+        self.bufferSize = 1024
+        self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.server_socket.bind((self.localIP, self.localPort))
+
         #base icon
         self.base = PhotoImage(file="baseicon.png")
         self.red_player_widget = []
         self.green_player_widget = []
-        
 
+        self.player_score = {}
+        self.red_team_score = 0
+        self.green_team_score = 0
+
+        #initialize player scores
+        for p in self.red_players + self.green_players:
+            self.player_score[p.equipment_id] = 0
+        
         self._style()
+        self.event_queue = queue.Queue()
         self._ui()
 
     def _key_input(self) -> None:
@@ -215,6 +82,8 @@ class PlayAction(tk.Frame):
 
     def current_game_score(self, parent):
         current_score = tk.Frame(parent, bg="black")
+        self.red_total_var = tk.StringVar(value="0")
+        self.green_total_var = tk.StringVar(value="0")
         current_score.grid(row=0, column=0, padx=20, pady=10, sticky="nsew")
 
         # configure rows and columns
@@ -246,7 +115,7 @@ class PlayAction(tk.Frame):
         if self.red_players:
             for player in self.red_players:
                 row = tk.Frame(self.red_player_frame, bg="black")
-                row.pack(anchor="w")
+                row.grid(sticky="w")
 
                 icon = tk.Label(row, bg="black")
                 icon.pack(side="left", padx=(0,5))
@@ -262,7 +131,10 @@ class PlayAction(tk.Frame):
                     justify="left"
                 )
                 red_player.pack(side="left")
-                self.red_player_widget.append((player, icon))
+                score_var = tk.StringVar(value="0")
+                score_label = tk.Label(row, textvariable=score_var, font=("Courier New", 16, "bold"), fg="white", bg="black")
+                score_label.pack(side="right")
+                self.red_player_widget.append((player, icon, score_var))
         else:
             red_player = tk.Label(
                 self.red_player_frame,
@@ -274,9 +146,9 @@ class PlayAction(tk.Frame):
             red_player.pack(anchor="w")
             # red_player_frame.grid(row=2, column=0, padx=20, pady=10, sticky="nw")
 
-        red_score_frame = tk.Frame(current_score, bg="black")
-        red_score_frame.grid(row=2, column=0, sticky="ne", padx=20, pady=10)
-        tk.Label(red_score_frame, text="0", font=("Courier New", 20, "bold"), fg="red", bg="black").pack(anchor="e")
+        #red_score_frame = tk.Frame(current_score, bg="black")
+        #red_score_frame.grid(row=2, column=0, sticky="ne", padx=20, pady=10)
+        #tk.Label(red_score_frame, text="0", font=("Courier New", 20, "bold"), fg="red", bg="black").pack(anchor="e")
 
         # GREEN TEAM
         green_team_title = tk.Label(current_score, text="GREEN TEAM", font=("Courier New", 20, "bold"), fg="white", bg="black")
@@ -307,7 +179,10 @@ class PlayAction(tk.Frame):
                     justify="left"
                 )
                 green_player.pack(side="left")
-                self.green_player_widget.append((player, icon))
+                score_var = tk.StringVar(value="0")
+                score_label = tk.Label(row, textvariable=score_var, font=("Courier New", 16, "bold"), fg="white", bg="black")
+                score_label.pack(side="right")
+                self.green_player_widget.append((player, icon, score_var))
         else:
             green_player = tk.Label(
                 self.green_player_frame,
@@ -322,23 +197,23 @@ class PlayAction(tk.Frame):
 
         green_score_frame = tk.Frame(current_score, bg="black")
         green_score_frame.grid(row=2, column=1, sticky="ne", padx=20, pady=10)
-        tk.Label(green_score_frame, text="0", font=("Courier New", 20, "bold"), fg="green", bg="black").pack(anchor="e")
+        #tk.Label(green_score_frame, text="0", font=("Courier New", 20, "bold"), fg="green", bg="black").pack(anchor="e")
 
         # Team totals
-        red_total = tk.Label(current_score, text="0", font=("Courier New", 20, "bold"), fg="red", bg="black")
+        red_total = tk.Label(current_score, textvariable=self.red_total_var, font=("Courier New", 20, "bold"), fg="red", bg="black")
         red_total.grid(row=3, column=0, padx=20, pady=10, sticky="se")
 
-        green_total = tk.Label(current_score, text="0", font=("Courier New", 20, "bold"), fg="green", bg="black")
+        green_total = tk.Label(current_score, textvariable=self.green_total_var, font=("Courier New", 20, "bold"), fg="green", bg="black")
         green_total.grid(row=3, column=1, padx=20, pady=10, sticky="se")
 
     #base icon
     def base_scored(self, equipment_id):
-        for player, icon in self.red_player_widget:
+        for player, icon, score_var in self.red_player_widget:
             if player.equipment_id == equipment_id:
                 icon.config(image=self.base)
                 icon.image = self.base
                 return
-        for player, icon in self.green_player_widget:
+        for player, icon, score_var in self.green_player_widget:
             if player.equipment_id == equipment_id:
                 icon.config(image=self.base)
                 icon.image = self.base
@@ -351,8 +226,8 @@ class PlayAction(tk.Frame):
         current_action_title = tk.Label(current_action, text="Current Game Action", font=("Courier New", 20, "bold"), fg="white", bg="blue")
         current_action_title.grid(row=0, column=0, padx=20, pady=10, sticky="n")
 
-        current_action_listbox = tk.Listbox(current_action, bg="blue", fg="white", font=("Courier New", 16, "bold"), relief="flat", borderwidth=0)
-        current_action_listbox.grid(row=1, column=0, sticky="nsew")
+        self.current_action_listbox = tk.Listbox(current_action, bg="blue", fg="white", font=("Courier New", 16, "bold"), relief="flat", borderwidth=0)
+        self.current_action_listbox.grid(row=1, column=0, sticky="nsew")
 
     def countdown_timer(self, parent):
         timer = tk.Frame(parent, bg="black")
@@ -422,7 +297,76 @@ class PlayAction(tk.Frame):
                 self.timer_running = False
                 self.timer_label.config(text="GAME OVER")
 
+    
+    #for traffic generator
+    def listen_for_hits(self):
+        import threading
+        def receive():
+            while True:
+                 data, addr = self.server_socket.recvfrom(self.bufferSize)
+                 message = data.decode()
+                 print("Received:", message)
+                 #send to UI safely
+                 self.event_queue.put(message)
+                 #ACK back to traffic generator
+                 self.server_socket.sendto("ACK".encode(), addr)
+                 
+        thread = threading.Thread(target=receive, daemon=True)
+        thread.start()
+        #start UI polling loop
+        self.after(100, self.process_queue)
+
+    def process_queue(self):
+        while not self.event_queue.empty():
+            message = self.event_queue.get()
+            #show raw event
+            self.current_action_listbox.insert(tk.END, f"Raw: {message}")
+            try:
+                attacker, target = message.split(":")
+                attacker = int(attacker)
+                target = int(target)
+            except:
+                continue
+            #event type detection
+            if target == 43:
+                event_text = f" BASE HIT by Player {attacker} (RED BASE)"
+            elif target == 53:
+                event_text = f" BASE HIT by Player {attacker} (GREEN BASE)"
+            elif attacker == target:
+                event_text = f" FRIENDLY FIRE: Player {attacker}"
+            else: 
+                event_text = f" HIT: Player {attacker} -> Player {target}"
+            #show event
+            self.current_action_listbox.insert(tk.END, event_text)
+            self.current_action_listbox.yview(tk.END)
+            red_ids = [p.equipment_id for p in self.red_players]
+            green_ids = [p.equipment_id for p in self.green_players]
             
+            if target == 43:
+                self.green_team_score += 100
+            elif target == 53:
+                self.red_team_score += 100
+            else:
+                if attacker in red_ids and target in green_ids:
+                    self.player_score[attacker] += 10
+                    self.red_team_score += 10
+                elif attacker in green_ids and target in red_ids:
+                    self.player_score[attacker] += 10
+                    self.green_team_score += 10
+            
+            #update player score labels
+            for player, icon, score_var in self.red_player_widget:
+                score_var.set(str(self.player_score[player.equipment_id]))
+            for player, icon, score_var in self.green_player_widget:
+                score_var.set(str(self.player_score[player.equipment_id]))
+			
+            #update UI
+            self.red_total_var.set(str(self.red_team_score))
+            self.green_total_var.set(str(self.green_team_score))
+            
+            #update visuals
+            self.base_scored(int(target))
+        self.after(100, self.process_queue)
 
 
 if __name__ == "__main__":
@@ -443,7 +387,7 @@ if __name__ == "__main__":
     # Example PlayerEntry objects (replace with your real PlayerEntry instances)
     class PlayerEntry:
         def __init__(self, id, codename):
-            self.id = id
+            self.equipment_id = id
             self.codename = codename
 
     red_team = [PlayerEntry(1, "Alice"), PlayerEntry(2, "Bob")]
