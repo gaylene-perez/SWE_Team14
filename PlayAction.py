@@ -283,6 +283,7 @@ class PlayAction(tk.Frame):
             else: 
                 self.timer_mode = "game"
                 self.timer_label.config(text="GO!")
+				self.listen_for_hits()
                 self.after(1000, self.update_timer)
 
         # 6 minute gameplay timer code: 
