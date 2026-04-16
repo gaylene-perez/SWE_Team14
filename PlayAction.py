@@ -373,11 +373,11 @@ class PlayAction(tk.Frame):
                 elif attacker in red_ids and target in red_ids:
                     self.player_score[attacker] -= 10
                     self.player_score[target] -= 10
-                    self.red_ream_score -= 20
+                    self.red_team_score -= 20
                 elif attacker in green_ids and target in green_ids:
                     self.player_score[attacker] -= 10
                     self.player_score[target] -= 10
-                    self.green_ream_score -= 20
+                    self.green_team_score -= 20
             
             #update player score labels
             for player, icon, score_var in self.red_player_widget:
