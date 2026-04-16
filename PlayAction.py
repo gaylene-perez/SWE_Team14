@@ -283,6 +283,7 @@ class PlayAction(tk.Frame):
             else: 
                 self.timer_mode = "game"
                 self.timer_label.config(text="GO!")
+				self.server_socket.sendto("202".encode(), "127.0.0.1", 7500))
 				self.listen_for_hits()
                 self.after(1000, self.update_timer)
 
