@@ -556,7 +556,7 @@ class PlayerScreen(BaseMenu):
         try:
             print("DEBUG: Loading players from DB...")
             with database.conn.cursor() as cursor:
-                cursor.execute("SELECT * FROM players ORDER BY player_id")
+                cursor.execute("SELECT * FROM players ORDER BY id")
                 records = cursor.fetchall()
                 print("DEBUG: records =", records)
 
@@ -576,6 +576,16 @@ class PlayerScreen(BaseMenu):
         play_window = tk.Toplevel(self.master)
         play_window.title("PLAY GAME")
         play_window.resizable(width=False, height=False)
+
+        width = 1000
+        height = 637
+
+        screen_width = play_window.winfo_screenwidth()
+        screen_height = play_window.winfo_screenheight()
+
+        x = int((screen_width / 2) - (width / 2))
+        y = int((screen_height / 2) - (height / 2))
+        play_window.geometry(f"{width}x{height}+{x}+{y}")
 
         screen = PlayAction (play_window, red_players=self.red_players, green_players=self.green_players)
         screen.pack(fill="both", expand=True)
