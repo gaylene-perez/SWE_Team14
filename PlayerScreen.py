@@ -556,7 +556,7 @@ class PlayerScreen(BaseMenu):
         try:
             print("DEBUG: Loading players from DB...")
             with database.conn.cursor() as cursor:
-                cursor.execute("SELECT * FROM players ORDER BY id")
+                cursor.execute("SELECT * FROM players ORDER BY player_id")
                 records = cursor.fetchall()
                 print("DEBUG: records =", records)
 
