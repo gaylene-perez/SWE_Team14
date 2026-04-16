@@ -93,6 +93,7 @@ class PlayAction(tk.Frame):
             pass
         self.master.destroy()
 
+
     def current_game_score(self, parent):
         current_score = tk.Frame(parent, bg="black")
         self.red_total_var = tk.StringVar(value="0")
