@@ -2,7 +2,6 @@ import tkinter as tk
 import socket
 import queue
 from tkinter import PhotoImage
-from BaseMenu import BaseMenu
 from Music import PlayMusic
 
 class PlayAction(tk.Frame):
@@ -77,8 +76,22 @@ class PlayAction(tk.Frame):
         self.game_action(content)
         # countdown timer
         self.countdown_timer(content)
-        # menu (from BaseMenu)
-        #super()._ui(content)
+
+        #home button
+        back = tk.Frame(content, bg="black")
+        back.grid(row=3, column=0, pady=10, sticky="ew")
+
+        back_btn= tk.Button(back, text="Return to Player Entry", command=self.go_back, fg="blue", bg="gray", activebackground="gray", relief="ridge", bd=2, font=("Courier New", 20, "bold"))
+        back_btn.pack()
+
+    def go_back(self):
+        self.timer_running = False
+
+        try:
+            self.server_socket.close()
+        except:
+            pass
+        self.master.destroy()
 
     def current_game_score(self, parent):
         current_score = tk.Frame(parent, bg="black")
