@@ -183,7 +183,7 @@ class PlayAction(tk.Frame):
                 score_label = tk.Label(row, textvariable=score_var, font=("Courier New", 16, "bold"), fg="white", bg="black")
                 score_label.pack(side="right")
                 self.green_player_widget.append((player, icon, score_var))
-	    else:
+        else:
             green_player = tk.Label(
                 self.green_player_frame,
                 text="Player Names",
@@ -283,8 +283,8 @@ class PlayAction(tk.Frame):
             else: 
                 self.timer_mode = "game"
                 self.timer_label.config(text="GO!")
-				self.server_socket.sendto("202".encode(), "127.0.0.1", 7500))
-				self.listen_for_hits()
+                self.server_socket.sendto("202".encode(), ("127.0.0.1", 7500))
+                self.listen_for_hits()
                 self.after(1000, self.update_timer)
 
         # 6 minute gameplay timer code: 
@@ -361,7 +361,7 @@ class PlayAction(tk.Frame):
                 score_var.set(str(self.player_score[player.equipment_id]))
             for player, icon, score_var in self.green_player_widget:
                 score_var.set(str(self.player_score[player.equipment_id]))
-			
+
             #update UI
             self.red_total_var.set(str(self.red_team_score))
             self.green_total_var.set(str(self.green_team_score))
