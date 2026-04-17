@@ -95,10 +95,13 @@ class PlayAction(tk.Frame):
 
     def _make_scroll(self, parent, bg: str):
         canvas = tk.Canvas(parent, bg=bg, highlightthickness=0)
+        scrollbar = tk.Scrollbar(parent, orient="vertical", command=canvas.yview)
         inner = tk.Frame(canvas, bg=bg)
         window_id = canvas.create_window((0, 0), window=inner, anchor="nw")
+        canvas.configure(yscrollcommand=scrollbar.set)
 
         def _on_configure(event):
+            inner.update_idletasks()
             canvas.configure(scrollregion=canvas.bbox("all"))
 
         def _on_resize(event):
@@ -115,10 +118,12 @@ class PlayAction(tk.Frame):
 
         def _unbind(_):
             canvas.unbind_all("<MouseWheel>")
-            
+
         canvas.bind("<Enter>", _bind)
         canvas.bind("<Leave>", _unbind)
+
         canvas.pack(side="left", fill="both", expand=True)
+        scrollbar.pack(side="right", fill="y")
 
         return canvas, inner
 
@@ -134,6 +139,8 @@ class PlayAction(tk.Frame):
         current_score.rowconfigure(1, weight=0)  # team titles
         current_score.rowconfigure(2, weight=1)  # player names + scores
         current_score.rowconfigure(3, weight=0)  # team totals
+        current_score.config(height=250)
+        current_score.grid_propagate(False)
 
         current_score.columnconfigure(0, weight=1)  # red team
         current_score.columnconfigure(1, weight=1)  # green team
@@ -271,6 +278,8 @@ class PlayAction(tk.Frame):
     def game_action(self, parent):
         current_action = tk.Frame(parent, bg="blue")
         current_action.grid(row=1, column=0, padx=20, pady=10, sticky="nsew")
+        current_action.rowconfigure(1, weight=1)
+        current_action.columnconfigure(0, weight=1)
 
         current_action_title = tk.Label(current_action, text="Current Game Action", font=("Courier New", 20, "bold"), fg="white", bg="blue")
         current_action_title.grid(row=0, column=0, padx=20, pady=10, sticky="n")
