@@ -149,8 +149,8 @@ class PlayAction(tk.Frame):
         red_team_title = tk.Label(current_score, text="RED TEAM", font=("Courier New", 20, "bold"), fg="red", bg="black")
         red_team_title.grid(row=1, column=0, padx=20, pady=10, sticky="n")
 
-        self.red_player_frame = tk.Frame(current_score, bg="black")
-        self.red_player_frame.grid(row=2, column=0, padx=20, pady=10, sticky="nsew")
+        red_container = tk.Frame(current_score, bg="black")
+        red_container.grid(row=2, column=0, padx=20, pady=10, sticky="nsew")
         _, self.red_player_frame = self._make_scroll(red_container, "black")
         red_container.config(height=180)
         red_container.grid_propagate(False)
@@ -200,8 +200,8 @@ class PlayAction(tk.Frame):
         green_team_title = tk.Label(current_score, text="GREEN TEAM", font=("Courier New", 20, "bold"), fg="green", bg="black")
         green_team_title.grid(row=1, column=1, padx=20, pady=10, sticky="n")
 
-        self.green_player_frame = tk.Frame(current_score, bg="black")
-        self.green_player_frame.grid(row=2, column=1, padx=20, pady=10, sticky="nsew")
+        green_container = tk.Frame(current_score, bg="black")
+        green_container.grid(row=2, column=1, padx=20, pady=10, sticky="nsew")
         _, self.green_player_frame = self._make_scroll(green_container, "black")
         green_container.config(height=180)
         green_container.grid_propagate(False)
