@@ -64,9 +64,9 @@ class PlayAction(tk.Frame):
         content = tk.Frame(self, bg="black")
         content.grid(row=0, column=0, sticky="nsew")
 
-        content.rowconfigure(0, weight=4)  # current scores
-        content.rowconfigure(1, weight=5)  # game action
-        content.rowconfigure(2, weight=1)  # countdown timer
+        content.rowconfigure(0, weight=0)  # current scores
+        content.rowconfigure(1, weight=1)  # game action
+        content.rowconfigure(2, weight=0)  # countdown timer
         content.rowconfigure(3, weight=0)  # menu
         content.columnconfigure(0, weight=1)
 
@@ -93,17 +93,46 @@ class PlayAction(tk.Frame):
             pass
         self.master.destroy()
 
+    def _make_scroll(self, parent, bg: str):
+        canvas = tk.Canvas(parent, bg=bg, highlightthickness=0)
+        inner = tk.Frame(canvas, bg=bg)
+        window_id = canvas.create_window((0, 0), window=inner, anchor="nw")
+
+        def _on_configure(event):
+            canvas.configure(scrollregion=canvas.bbox("all"))
+
+        def _on_resize(event):
+            canvas.itemconfigure(window_id, width=event.width)
+
+        inner.bind("<Configure>", _on_configure)
+        canvas.bind("<Configure>", _on_resize)
+
+        def _on_mousewheel(event):
+            canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+
+        def _bind(_):
+            canvas.bind_all("<MouseWheel>", _on_mousewheel)
+
+        def _unbind(_):
+            canvas.unbind_all("<MouseWheel>")
+            
+        canvas.bind("<Enter>", _bind)
+        canvas.bind("<Leave>", _unbind)
+        canvas.pack(side="left", fill="both", expand=True)
+
+        return canvas, inner
+
 
     def current_game_score(self, parent):
         current_score = tk.Frame(parent, bg="black")
         self.red_total_var = tk.StringVar(value="0")
         self.green_total_var = tk.StringVar(value="0")
-        current_score.grid(row=0, column=0, padx=20, pady=10, sticky="nsew")
+        current_score.grid(row=0, column=0, sticky="nsew")
 
         # configure rows and columns
         current_score.rowconfigure(0, weight=0)  # title row
-        current_score.rowconfigure(1, weight=1)  # team titles
-        current_score.rowconfigure(2, weight=2)  # player names + scores
+        current_score.rowconfigure(1, weight=0)  # team titles
+        current_score.rowconfigure(2, weight=1)  # player names + scores
         current_score.rowconfigure(3, weight=0)  # team totals
 
         current_score.columnconfigure(0, weight=1)  # red team
@@ -117,12 +146,15 @@ class PlayAction(tk.Frame):
         title2.grid(row=0, column=0, padx=20, pady=10, sticky="nw")
 
         # RED TEAM
-        red_team_title = tk.Label(current_score, text="RED TEAM", font=("Courier New", 20, "bold"), fg="white", bg="black")
+        red_team_title = tk.Label(current_score, text="RED TEAM", font=("Courier New", 20, "bold"), fg="red", bg="black")
         red_team_title.grid(row=1, column=0, padx=20, pady=10, sticky="n")
 
         self.red_player_frame = tk.Frame(current_score, bg="black")
-        self.red_player_frame.grid(row=2, column=0, padx=20, pady=10, sticky="nw")
-
+        self.red_player_frame.grid(row=2, column=0, padx=20, pady=10, sticky="nsew")
+        _, self.red_player_frame = self._make_scroll(red_container, "black")
+        red_container.config(height=180)
+        red_container.grid_propagate(False)
+        
         self.red_player_widget = []
 
         # red_names = [p.codename for p in self.red_players] if self.red_players else ["Player Names"]
@@ -146,7 +178,7 @@ class PlayAction(tk.Frame):
                 )
                 red_player.pack(side="left")
                 score_var = tk.StringVar(value="0")
-                score_label = tk.Label(row, textvariable=score_var, font=("Courier New", 16, "bold"), fg="white", bg="black")
+                score_label = tk.Label(row, textvariable=score_var, font=("Courier New", 16, "bold"), fg="red", bg="black")
                 score_label.pack(side="right")
                 self.red_player_widget.append((player, icon, score_var))
         else:
@@ -165,11 +197,14 @@ class PlayAction(tk.Frame):
         #tk.Label(red_score_frame, text="0", font=("Courier New", 20, "bold"), fg="red", bg="black").pack(anchor="e")
 
         # GREEN TEAM
-        green_team_title = tk.Label(current_score, text="GREEN TEAM", font=("Courier New", 20, "bold"), fg="white", bg="black")
+        green_team_title = tk.Label(current_score, text="GREEN TEAM", font=("Courier New", 20, "bold"), fg="green", bg="black")
         green_team_title.grid(row=1, column=1, padx=20, pady=10, sticky="n")
 
         self.green_player_frame = tk.Frame(current_score, bg="black")
-        self.green_player_frame.grid(row=2, column=1, padx=20, pady=10, sticky="nw")
+        self.green_player_frame.grid(row=2, column=1, padx=20, pady=10, sticky="nsew")
+        _, self.green_player_frame = self._make_scroll(green_container, "black")
+        green_container.config(height=180)
+        green_container.grid_propagate(False)
 
         self.green_player_widget = []
 
@@ -194,7 +229,7 @@ class PlayAction(tk.Frame):
                 )
                 green_player.pack(side="left")
                 score_var = tk.StringVar(value="0")
-                score_label = tk.Label(row, textvariable=score_var, font=("Courier New", 16, "bold"), fg="white", bg="black")
+                score_label = tk.Label(row, textvariable=score_var, font=("Courier New", 16, "bold"), fg="green", bg="black")
                 score_label.pack(side="right")
                 self.green_player_widget.append((player, icon, score_var))
         else:
