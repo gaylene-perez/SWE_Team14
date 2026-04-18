@@ -86,7 +86,8 @@ class PlayAction(tk.Frame):
 
     def go_back(self):
         self.timer_running = False
-
+        self.music.stop()
+        
         try:
             self.server_socket.close()
         except:
