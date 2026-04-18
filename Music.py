@@ -13,3 +13,6 @@ class PlayMusic():
         mixer.init()
         mixer.music.load(self.file_path)
         mixer.music.play()
+
+    def stop(self):
+        mixer.music.stop()
