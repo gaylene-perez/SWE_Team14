@@ -362,10 +362,10 @@ class PlayAction(tk.Frame):
                 self.after(1000, self.update_timer)
                 self.after(100, self.process_queue)
                 self.flash_high_score()
+                self.music.play()
 
         # 6 minute gameplay timer code: 
         elif self.timer_mode == "game":
-            self.music.play()
             self.timer_label.config(text=self.format_time(self.game_time_left))
 
             if self.game_time_left > 0:
