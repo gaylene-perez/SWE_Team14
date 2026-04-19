@@ -447,8 +447,13 @@ class PlayAction(tk.Frame):
                 # Assign values immediately
                 attacker_id = int(parts[0])
                 target_id = int(parts[1])
+
+                if attacker_id == target_id:
+                    print(f"Ignoring self-hit from {attacker_id}")
+                    self.server_socket.sendto(str(target_id).encode(), ("127.0.0.1", 7500))
+                    continue
                 
-                # 1. Look up names and teams
+                #  Look up names and teams
                 attacker_name = self.get_codename(attacker_id)
                 target_name = self.get_codename(target_id)
                 
@@ -458,7 +463,7 @@ class PlayAction(tk.Frame):
                 event_text = ""
                 is_friendly = False
 
-                # 2. Identify Event Type and Update Scores
+                #  Identify Event Type and Update Scores
                 if target_id == 43: # Red Base Hit
                     event_text = f"BASE HIT: {attacker_name} struck RED BASE"
                     self.green_team_score += 100
