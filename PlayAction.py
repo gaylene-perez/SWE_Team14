@@ -479,8 +479,8 @@ class PlayAction(tk.Frame):
                     is_friendly = True
                     event_text = f"FRIENDLY FIRE: {attacker_name} hit {target_name}"
                     self.player_score[attacker_id] = self.player_score.get(attacker_id, 0) - 10
-                    if attacker_id in red_ids: self.red_team_score -= 20
-                    else: self.green_team_score -= 20
+                    if attacker_id in red_ids: self.red_team_score -= 10
+                    else: self.green_team_score -= 10
                 else:
                     # STANDARD HIT
                     event_text = f"HIT: {attacker_name} -> {target_name}"
