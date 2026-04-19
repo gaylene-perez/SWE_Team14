@@ -466,10 +466,12 @@ class PlayAction(tk.Frame):
                 #  Identify Event Type and Update Scores
                 if target_id == 43: # Red Base Hit
                     event_text = f"BASE HIT: {attacker_name} struck RED BASE"
+                    self.player_score[attacker_id] = self.player_score.get(attacker_id, 0) + 100
                     self.green_team_score += 100
                     self.base_scored(attacker_id)
                 elif target_id == 53: # Green Base Hit
                     event_text = f"BASE HIT: {attacker_name} struck GREEN BASE"
+                    self.player_scorer[attacker_id] = self.player_score.get(attacker_id, 0) + 100
                     self.red_team_score += 100
                     self.base_scored(attacker_id)
                 elif (attacker_id in red_ids and target_id in red_ids) or \
