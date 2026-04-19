@@ -27,9 +27,11 @@ class PlayAction(tk.Frame):
         #upd setup
         self.localIP = "0.0.0.0"
         self.localPort = 7501
-        self.bufferSize = 1024
+        self.bufferSize = 4096
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.server_socket.bind((self.localIP, self.localPort))
+        self.after(100, self.process_queue)
 
         #base icon
         self.base = PhotoImage(file="baseicon.png")
@@ -94,39 +96,50 @@ class PlayAction(tk.Frame):
             pass
         self.master.destroy()
 
+    
     def _make_scroll(self, parent, bg: str):
         canvas = tk.Canvas(parent, bg=bg, highlightthickness=0)
         scrollbar = tk.Scrollbar(parent, orient="vertical", command=canvas.yview)
         inner = tk.Frame(canvas, bg=bg)
         window_id = canvas.create_window((0, 0), window=inner, anchor="nw")
         canvas.configure(yscrollcommand=scrollbar.set)
-
         def _on_configure(event):
             inner.update_idletasks()
             canvas.configure(scrollregion=canvas.bbox("all"))
-
         def _on_resize(event):
             canvas.itemconfigure(window_id, width=event.width)
-
         inner.bind("<Configure>", _on_configure)
         canvas.bind("<Configure>", _on_resize)
-
         def _on_mousewheel(event):
             canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
-
         def _bind(_):
             canvas.bind_all("<MouseWheel>", _on_mousewheel)
-
         def _unbind(_):
             canvas.unbind_all("<MouseWheel>")
-
         canvas.bind("<Enter>", _bind)
         canvas.bind("<Leave>", _unbind)
-
         canvas.pack(side="left", fill="both", expand=True)
         scrollbar.pack(side="right", fill="y")
-
         return canvas, inner
+
+
+    def receive_loop(self):
+        print("Receiver thread active and listening...")
+        while self.timer_running: # Stop listening when game ends
+            try:
+                # Set a small timeout so the thread can check self.timer_running
+                self.server_socket.settimeout(1.0) 
+                data, addr = self.server_socket.recvfrom(self.bufferSize)
+                message = data.decode(errors='ignore').strip()
+            
+                if message:
+                    print(f"Data in: {message}")
+                    self.event_queue.put(message)
+            except socket.timeout:
+                continue # Just loop back and check timer_running
+            except Exception as e:
+                print(f"Receiver Thread Error: {e}")
+                break
 
 
     def current_game_score(self, parent):
@@ -169,7 +182,7 @@ class PlayAction(tk.Frame):
         if self.red_players:
             for player in self.red_players:
                 row = tk.Frame(self.red_player_frame, bg="black")
-                row.grid(sticky="w")
+                row.pack(anchor="w", fill="x", pady=2)
 
                 icon = tk.Label(row, bg="black")
                 icon.pack(side="left", padx=(0,5))
@@ -257,11 +270,11 @@ class PlayAction(tk.Frame):
         #tk.Label(green_score_frame, text="0", font=("Courier New", 20, "bold"), fg="green", bg="black").pack(anchor="e")
 
         # Team totals
-        red_total = tk.Label(current_score, textvariable=self.red_total_var, font=("Courier New", 20, "bold"), fg="red", bg="black")
-        red_total.grid(row=3, column=0, padx=20, pady=10, sticky="se")
+        self.red_total_label = tk.Label(current_score, textvariable=self.red_total_var, font=("Courier New", 20, "bold"), fg="red", bg="black")
+        self.red_total_label.grid(row=3, column=0, padx=20, pady=10, sticky="se")
 
-        green_total = tk.Label(current_score, textvariable=self.green_total_var, font=("Courier New", 20, "bold"), fg="green", bg="black")
-        green_total.grid(row=3, column=1, padx=20, pady=10, sticky="se")
+        self.green_total_label = tk.Label(current_score, textvariable=self.green_total_var, font=("Courier New", 20, "bold"), fg="green", bg="black")
+        self.green_total_label.grid(row=3, column=1, padx=20, pady=10, sticky="se")
 
     #base icon
     def base_scored(self, equipment_id):
@@ -343,8 +356,12 @@ class PlayAction(tk.Frame):
                 self.timer_mode = "game"
                 self.timer_label.config(text="GO!")
                 self.server_socket.sendto("202".encode(), ("127.0.0.1", 7500))
-                self.listen_for_hits()
+                import threading
+                threading.Thread(target=self.receive_loop, daemon=True).start()
+                print("Starting listener thread...")
                 self.after(1000, self.update_timer)
+                self.after(100, self.process_queue)
+                self.flash_high_score()
 
         # 6 minute gameplay timer code: 
         elif self.timer_mode == "game":
@@ -358,85 +375,144 @@ class PlayAction(tk.Frame):
                 self.timer_running = False
                 self.timer_label.config(text="GAME OVER")
 
+    def get_codename(self, equipment_id):
+        # Search red team
+        for p in self.red_players:
+            if p.equipment_id == equipment_id:
+                return p.codename
+        # Search green team
+        for p in self.green_players:
+            if p.equipment_id == equipment_id:
+                return p.codename
+        # Fallback if ID isn't found (like for the base IDs 43/53)
+        return f"Unknown({equipment_id})"
+
+    def flash_high_score(self):
+        if not self.timer_running:
+            self.red_total_label.config(fg="red")
+            self.green_total_label.config(fg="green")
+            return
+
+        if self.red_team_score == self.green_team_score:
+            self.red_total_label.config(fg="red")
+            self.green_total_label.config(fg="green")
+        elif self.red_team_score > self.green_team_score:
+            self.green_total_label.config(fg="green") 
+            new_color = "white" if self.red_total_label.cget("foreground") == "red" else "red"
+            self.red_total_label.config(fg=new_color)
+        else: # Green winning
+            self.red_total_label.config(fg="red")
+            new_color = "white" if self.green_total_label.cget("foreground") == "green" else "green"
+            self.green_total_label.config(fg=new_color)
     
-    #for traffic generator
-    def listen_for_hits(self):
-        import threading
-        def receive():
-            while True:
-                 data, addr = self.server_socket.recvfrom(self.bufferSize)
-                 message = data.decode()
-                 print("Received:", message)
-                 #send to UI safely
-                 self.event_queue.put(message)
-                 #ACK back to traffic generator
-                 self.server_socket.sendto("ACK".encode(), addr)
-                 
-        thread = threading.Thread(target=receive, daemon=True)
-        thread.start()
-        #start UI polling loop
-        self.after(100, self.process_queue)
+        self.after(500, self.flash_high_score)
+
+    def sort_scores(self):
+        # Sort the lists in memory first
+        self.red_player_widget.sort(
+            key=lambda x: self.player_score.get(x[0].equipment_id, 0), 
+            reverse=True
+        )
+        self.green_player_widget.sort(
+            key=lambda x: self.player_score.get(x[0].equipment_id, 0), 
+            reverse=True
+        )
+        # Re-pack Red Team
+        for player, icon, score_var in self.red_player_widget:
+            row_frame = icon.master 
+            row_frame.pack(anchor="w", fill="x", pady=2)
+        # Re-pack Green Team
+        for player, icon, score_var in self.green_player_widget:
+            row_frame = icon.master
+            row_frame.pack(anchor="w", fill="x", pady=2)
+
 
     def process_queue(self):
         while not self.event_queue.empty():
-            message = self.event_queue.get()
-            #show raw event
-            self.current_action_listbox.insert(tk.END, f"Raw: {message}")
+            # Define these at the very top of the loop so they ALWAYS exist
+            attacker_id = 0
+            target_id = 0
+            
             try:
-                attacker, target = message.split(":")
-                attacker = int(attacker)
-                target = int(target)
-            except:
-                continue
-            #event type detection
-            if target == 43:
-                event_text = f" BASE HIT by Player {attacker} (RED BASE)"
-            elif target == 53:
-                event_text = f" BASE HIT by Player {attacker} (GREEN BASE)"
-            elif attacker == target:
-                event_text = f" FRIENDLY FIRE: Player {attacker}"
-            else: 
-                event_text = f" HIT: Player {attacker} -> Player {target}"
-            #show event
-            self.current_action_listbox.insert(tk.END, event_text)
-            self.current_action_listbox.yview(tk.END)
-            red_ids = [p.equipment_id for p in self.red_players]
-            green_ids = [p.equipment_id for p in self.green_players]
-            
-            if target == 43:
-                self.green_team_score += 100
-            elif target == 53:
-                self.red_team_score += 100
-            else:
-                if attacker in red_ids and target in green_ids:
-                    self.player_score[attacker] += 10
-                    self.red_team_score += 10
-                elif attacker in green_ids and target in red_ids:
-                    self.player_score[attacker] += 10
-                    self.green_team_score += 10
-                # Friendly Fire Handling
-                elif attacker in red_ids and target in red_ids:
-                    self.player_score[attacker] -= 10
-                    self.player_score[target] -= 10
-                    self.red_team_score -= 20
-                elif attacker in green_ids and target in green_ids:
-                    self.player_score[attacker] -= 10
-                    self.player_score[target] -= 10
-                    self.green_team_score -= 20
-            
-            #update player score labels
-            for player, icon, score_var in self.red_player_widget:
-                score_var.set(str(self.player_score[player.equipment_id]))
-            for player, icon, score_var in self.green_player_widget:
-                score_var.set(str(self.player_score[player.equipment_id]))
+                message = self.event_queue.get_nowait()
+                
+                # Basic validation: ensure it's a "hit" message
+                if ":" not in message:
+                    continue
+                    
+                parts = message.split(":")
+                if len(parts) != 2:
+                    continue
+                
+                # Assign values immediately
+                attacker_id = int(parts[0])
+                target_id = int(parts[1])
+                
+                # 1. Look up names and teams
+                attacker_name = self.get_codename(attacker_id)
+                target_name = self.get_codename(target_id)
+                
+                red_ids = [p.equipment_id for p in self.red_players]
+                green_ids = [p.equipment_id for p in self.green_players]
+                
+                event_text = ""
+                is_friendly = False
 
-            #update UI
-            self.red_total_var.set(str(self.red_team_score))
-            self.green_total_var.set(str(self.green_team_score))
-            
-            #update visuals
-            self.base_scored(int(target))
-        self.after(100, self.process_queue)
+                # 2. Identify Event Type and Update Scores
+                if target_id == 43: # Red Base Hit
+                    event_text = f"BASE HIT: {attacker_name} struck RED BASE"
+                    self.green_team_score += 100
+                    self.base_scored(attacker_id)
+                elif target_id == 53: # Green Base Hit
+                    event_text = f"BASE HIT: {attacker_name} struck GREEN BASE"
+                    self.red_team_score += 100
+                    self.base_scored(attacker_id)
+                elif (attacker_id in red_ids and target_id in red_ids) or \
+                     (attacker_id in green_ids and target_id in green_ids) or \
+                     (attacker_id == target_id):
+                    # FRIENDLY FIRE
+                    is_friendly = True
+                    event_text = f"FRIENDLY FIRE: {attacker_name} hit {target_name}"
+                    self.player_score[attacker_id] = self.player_score.get(attacker_id, 0) - 10
+                    if attacker_id in red_ids: self.red_team_score -= 20
+                    else: self.green_team_score -= 20
+                else:
+                    # STANDARD HIT
+                    event_text = f"HIT: {attacker_name} -> {target_name}"
+                    self.player_score[attacker_id] = self.player_score.get(attacker_id, 0) + 10
+                    if attacker_id in red_ids: self.red_team_score += 10
+                    else: self.green_team_score += 10
+
+                # 3. Update the UI
+                if event_text:
+                    self.current_action_listbox.insert(tk.END, event_text)
+                    self.current_action_listbox.see(tk.END)
+
+                # Update Score Labels
+                for player, icon, score_var in self.red_player_widget:
+                    score_var.set(str(self.player_score.get(player.equipment_id, 0)))
+                for player, icon, score_var in self.green_player_widget:
+                    score_var.set(str(self.player_score.get(player.equipment_id, 0)))
+
+                self.red_total_var.set(str(self.red_team_score))
+                self.green_total_var.set(str(self.green_team_score))
+
+                # 4. Response Handshake to Traffic Generator
+                # Send first response
+                self.server_socket.sendto(str(target_id).encode(), ("127.0.0.1", 7500))
+                
+                # Send second response for friendly fire
+                if is_friendly:
+                    self.server_socket.sendto(str(target_id).encode(), ("127.0.0.1", 7500))
+                    
+                #sorting by score
+                self.sort_scores()
+
+            except Exception as e:
+                print(f"Error processing message: {e}")
+
+        if self.timer_running:
+            self.after(100, self.process_queue)
 
 
 if __name__ == "__main__":
