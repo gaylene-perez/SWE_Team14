@@ -10,7 +10,7 @@ class PlayAction(tk.Frame):
         self.master = master
 
         self.music = PlayMusic()
-        self.music.play()
+        #self.music.play()
 
         # store PlayerEntry objects
         self.red_players = red_players if red_players else []
@@ -365,6 +365,7 @@ class PlayAction(tk.Frame):
 
         # 6 minute gameplay timer code: 
         elif self.timer_mode == "game":
+            self.music.play()
             self.timer_label.config(text=self.format_time(self.game_time_left))
 
             if self.game_time_left > 0:
