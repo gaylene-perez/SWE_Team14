@@ -10,7 +10,6 @@ class PlayAction(tk.Frame):
         self.master = master
 
         self.music = PlayMusic()
-        #self.music.play()
 
         # store PlayerEntry objects
         self.red_players = red_players if red_players else []
